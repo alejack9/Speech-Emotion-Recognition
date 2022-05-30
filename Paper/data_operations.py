@@ -95,4 +95,4 @@ class Reshape(DataOperation):
         super().__init__()
 
     def data_op(self, data: tf.Tensor):
-        return tf.reshape(data, (self.shape,))
+        return tf.reshape(data, self.shape)
