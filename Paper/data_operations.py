@@ -13,8 +13,6 @@ class DataOperation(abc.ABC):
 
     def __call__(self, data: tf.Tensor, label: tf.Tensor):
         return self.data_op(data), label
-    # def __call__(self, data: tf.Tensor):
-    #     return self.data_op(data)
 
 
 class ReadFile(DataOperation):
@@ -24,8 +22,7 @@ class ReadFile(DataOperation):
         :param data: Tensor with filename, dtype=string
         :return: Tensor with file contents, dtype=string
         """
-        file_content = tf.io.read_file(data)
-        return file_content
+        return tf.io.read_file(data)
 
 
 class DecodeWav(DataOperation):
@@ -35,8 +32,7 @@ class DecodeWav(DataOperation):
         :param data: Tensor with dtype=string
         :return: Tensor with dtype=int16
         """
-        decoded = tfio.audio.decode_wav(data, dtype=tf.int16)
-        return decoded
+        return tfio.audio.decode_wav(data, dtype=tf.int16)
 
 
 class Squeeze(DataOperation):
@@ -46,8 +42,7 @@ class Squeeze(DataOperation):
         :param data: Tensor with dimension [x, 1]
         :return: Tensor with dimension [x, ]
         """
-        squeezed = tf.squeeze(data, -1)
-        return squeezed
+        return tf.squeeze(data, -1)
 
 
 class Crop(DataOperation):
@@ -75,9 +70,7 @@ class ZeroPad(DataOperation):
         :param data: 1D numerical tensor of length below given length
         :return: 1D numerical tensor of given length
         """
-        zeros = tf.zeros(self.length - tf.shape(data), dtype=tf.int16)
-        padded = tf.concat([data, zeros], axis=0)
-        return padded
+        return tf.concat([data, tf.zeros(self.length - tf.shape(data), dtype=tf.int16)], axis=0)
 
 
 class CastToFloat(DataOperation):
@@ -85,8 +78,7 @@ class CastToFloat(DataOperation):
         super().__init__()
 
     def data_op(self, data: tf.Tensor):
-        floated = tf.cast(data, tf.float32)
-        return floated
+        return tf.cast(data, tf.float32)
 
 
 class Reshape(DataOperation):
