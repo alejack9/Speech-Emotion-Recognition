@@ -81,6 +81,14 @@ class CastToFloat(DataOperation):
         return tf.cast(data, tf.float32)
 
 
+class Normalize(DataOperation):
+    def __init__(self):
+        super().__init__()
+
+    def data_op(self, data: tf.Tensor):
+        return data / 32768.0
+
+
 class Reshape(DataOperation):
     def __init__(self, shape):
         self.shape = shape
