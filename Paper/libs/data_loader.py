@@ -10,7 +10,7 @@ from consts import SEED
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
-def load_data(samples_location, file_label_getter, file_speaker_getter, audio_sample_seconds=8, train_val_test_sizes=[62.5, 20.833, 16.666]):
+def get_dataset_information(samples_location, file_label_getter, file_speaker_getter):
   
   filenames = [f'{samples_location}/{p}' for p in os.listdir(samples_location)]
   labels = list(map(file_label_getter, filenames))
@@ -28,7 +28,13 @@ def load_data(samples_location, file_label_getter, file_speaker_getter, audio_sa
   one_hot_column_names = [col for col in df if col.startswith('label_')]
 
   one_hot_mapper = dict([(str(list(v[:-1])).replace(']', '.]').replace(',','.'), v[-1]) for v in df[[*one_hot_column_names, 'label']].value_counts().index.values])
+
+  return df, one_hot_mapper, max_sample_rate
+
+def load_datasets(df, one_hot_mapper, max_sample_rate, audio_sample_seconds=8, train_val_test_sizes=[0.625, 0.20833, 0.16666]):
   
+  one_hot_column_names = [col for col in df if col.startswith('label_')]
+
   test_files, test_labels = np.array([]), np.array([])
   train_files, train_labels = np.array([]), np.array([])
   val_files, val_labels = np.array([]), np.array([])
@@ -69,8 +75,11 @@ def load_data(samples_location, file_label_getter, file_speaker_getter, audio_sa
   print('Validation set size', len(val_files))
   print('Test set size', len(test_files))
 
+  print('Train sample:')
   print(train_files[0], train_labels[0])
+  print('Val sample:')
   print(val_files[0], val_labels[0])
+  print('Test sample:')
   print(test_files[0], test_labels[0])
 
   operations = [
@@ -93,9 +102,9 @@ def load_data(samples_location, file_label_getter, file_speaker_getter, audio_sa
     val_ds = val_ds.map(o, num_parallel_calls=tf.data.AUTOTUNE)
     test_ds = test_ds.map(o, num_parallel_calls=tf.data.AUTOTUNE)
 
-  return train_ds, val_ds, test_ds, {'origin_df': df,
+  return train_ds, val_ds, test_ds, {
     'labels_distribution': {
-      'complete': np.unique(labels, return_counts=True),
+      'complete': np.unique(df['label'], return_counts=True),
       'train': np.unique(list(map(str, train_labels)), return_counts=True),
       'val': np.unique(list(map(str, val_labels)), return_counts=True)
     },
