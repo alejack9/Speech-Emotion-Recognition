@@ -1,6 +1,7 @@
 from tensorflow.keras.callbacks import Callback, ModelCheckpoint, TensorBoard
 from libs.data_loader import load_data
 import libs.model_runner as model_runner
+import libs.data_visualization as visual
 import tensorflow as tf
 import numpy as np
 import datetime
@@ -24,6 +25,10 @@ def get_speaker_name(file_path):
     return parts
 
 train_ds, val_ds, test_ds, additional = load_data(DATA_DIR, get_label, get_speaker_name, audio_sample_seconds=8, train_val_test_sizes=[300, 100, 80])
+
+visual.plot_speakers_pie(additional['origin_df'])
+visual.plot_labels_distribution(additional['labels_distribution'], additional['one_hot_mapper'])
+visual.plot_audio_waves(train_ds, additional['one_hot_mapper'])
 
 class LastEpochWriterCallback(Callback):
     def on_epoch_end(self, epoch, logs=None):

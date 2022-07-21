@@ -26,6 +26,9 @@ def load_data(samples_location, file_label_getter, file_speaker_getter, audio_sa
   df = pd.get_dummies(df['label'], prefix="label").join(df)
 
   one_hot_column_names = [col for col in df if col.startswith('label_')]
+
+  one_hot_mapper = dict([(str(list(v[:-1])).replace(']', '.]').replace(',','.'), v[-1]) for v in df[[*one_hot_column_names, 'label']].value_counts().index.values])
+  
   test_files, test_labels = np.array([]), np.array([])
   train_files, train_labels = np.array([]), np.array([])
   val_files, val_labels = np.array([]), np.array([])
@@ -95,5 +98,6 @@ def load_data(samples_location, file_label_getter, file_speaker_getter, audio_sa
       'complete': np.unique(labels, return_counts=True),
       'train': np.unique(list(map(str, train_labels)), return_counts=True),
       'val': np.unique(list(map(str, val_labels)), return_counts=True)
-    }
+    },
+    'one_hot_mapper': one_hot_mapper
   }
