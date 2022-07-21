@@ -1,4 +1,4 @@
-seed = 0
+SEED = 0
 
 DATA_DIR = "./data/SAVEE"
 CHECKPOINT_DIR = '/public/a.giacche/checkpoints'

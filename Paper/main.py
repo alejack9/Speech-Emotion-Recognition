@@ -2,18 +2,17 @@ from tensorflow.keras.callbacks import Callback, ModelCheckpoint, TensorBoard
 from libs.data_loader import load_data
 import libs.model_runner as model_runner
 import tensorflow as tf
-import matplotlib.pyplot as plt
 import numpy as np
 import datetime
 from paper_model import PaperModel
-from consts import DATA_DIR, seed, CHECKPOINT_DIR, LOGS_DIR, LAST_EPOCH_FILE
+from consts import DATA_DIR, SEED, CHECKPOINT_DIR, LOGS_DIR, LAST_EPOCH_FILE
 import os
 import re 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 # Set the seed value for experiment reproducibility.
-tf.random.set_seed(seed)
-np.random.seed(seed)
+tf.random.set_seed(SEED)
+np.random.seed(SEED)
 
 def get_label(file_path):
     parts = re.sub('.+\_|[0-9]+.wav', '', file_path)

@@ -1,6 +1,8 @@
 import abc
 import tensorflow as tf
 import tensorflow_io as tfio
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 class DataOperation(abc.ABC):
     def __init__(self):
@@ -116,6 +118,7 @@ class Normalize(DataOperation):
         super().__init__()
 
     def data_op(self, data: tf.Tensor):
+        # 32768 is the max amplitude of wav signals 
         return data / 32768.0
 
 

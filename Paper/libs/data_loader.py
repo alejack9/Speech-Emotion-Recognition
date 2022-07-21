@@ -4,13 +4,13 @@ import numpy as np
 from sklearn.model_selection import StratifiedShuffleSplit
 import tensorflow as tf
 import tensorflow_io as tfio
-import Paper.libs.data_operations as data_ops
+import libs.data_operations as data_ops
 import matplotlib.pyplot as plt
+from consts import SEED
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 def load_data(samples_location, file_label_getter, file_speaker_getter, audio_sample_seconds=8, train_val_test_sizes=[62.5, 20.833, 16.666]):
-  seed = 42
   
   filenames = [f'{samples_location}/{p}' for p in os.listdir(samples_location)]
   labels = list(map(file_label_getter, filenames))
@@ -32,8 +32,8 @@ def load_data(samples_location, file_label_getter, file_speaker_getter, audio_sa
 
   n_speakers = len(df['speaker'].unique())
 
-  trainval_test_shuff = StratifiedShuffleSplit(n_splits=10, test_size=int(train_val_test_sizes[2] / n_speakers), random_state=seed)
-  train_val_shuff = StratifiedShuffleSplit(n_splits=10, test_size=int(train_val_test_sizes[1] / n_speakers), random_state=seed)
+  trainval_test_shuff = StratifiedShuffleSplit(n_splits=10, test_size=int(train_val_test_sizes[2] / n_speakers), random_state=SEED)
+  train_val_shuff = StratifiedShuffleSplit(n_splits=10, test_size=int(train_val_test_sizes[1] / n_speakers), random_state=SEED)
 
   for speaker in df['speaker'].unique():
     data = df[df['speaker'] == speaker]
