@@ -39,7 +39,7 @@ def run(data_dir, working_dir, epochs, batch_sizes):
 
   data_analysis(plots_dir, df)
 
-  for model_factory, train_val_tests_size, seconds in product(hyperparams.model_factories, hyperparams.train_val_test_sizes, hyperparams.seconds):
+  for model_factory, train_val_tests_percentage, seconds in product(hyperparams.model_factories, hyperparams.train_val_test_percentages, hyperparams.seconds):
     selected_batch_size_index = -1
     computed = False
     while not computed:
@@ -54,7 +54,7 @@ def run(data_dir, working_dir, epochs, batch_sizes):
       logging.info(f'Model: {model_factory.get_model_name()} , seconds: {seconds} , batch_size: {batch_size}')
 
       train_ds, val_ds, test_ds, additional = data_loader.load_datasets(df, max_sample_rate, audio_sample_seconds=seconds,
-        train_val_test_sizes=train_val_tests_size)
+        train_val_test_percentages=train_val_tests_percentage)
 
       model = model_factory.get_model(args={"input_shape": (max_sample_rate * seconds, 1), 'print_summary': False})
       model_name = f"m{model_factory.get_model_name()}_s{seconds}_b{batch_size}_sizes{str(train_val_tests_size).replace(' ', '')[1:-1]}"

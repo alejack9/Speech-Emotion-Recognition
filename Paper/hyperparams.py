@@ -4,6 +4,6 @@ model_factories = [
   PaperModelFactory()
 ]
 
-seconds = [8, 5, 4]
+seconds = [3, 4, 5, 8]
 
-train_val_test_sizes = [((300, 100, 80))]
+train_val_test_percentages = [((62.5, 20.833, 16.666))]
