@@ -62,7 +62,7 @@ def run(data_dir, working_dir, epochs, batch_sizes):
       current_plots_dir = create_folder(join(plots_dir, model_name))
       checkpoints_dir = create_folder(join(working_dir, "checkpoints", model_name))
       logs_dir = create_folder(join(working_dir, "logs", model_name))
-      last_epoch_file_path = create_folder(join(working_dir, "last_epochs")) + f"{model_name}.txt"
+      last_epoch_file_path = join(create_folder(join(working_dir, "last_epochs")), f"{model_name}.txt")
 
       visual.plot_labels_distribution(additional['labels_distribution'], one_hot_mapper, output_file=join(current_plots_dir, "labels_distribution.png"))
       visual.plot_audio_waves(train_ds, one_hot_mapper, output_file=join(current_plots_dir, "audio_waves.png"))
