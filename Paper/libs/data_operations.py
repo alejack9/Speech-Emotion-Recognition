@@ -79,8 +79,9 @@ class Squeeze(DataOperation):
 
 
 class Crop(DataOperation):
-    def __init__(self, length):
-        self.length = tf.constant([length])
+    def __init__(self, start, end):
+        self.start = tf.constant([start])
+        self.end = tf.constant([end])
         super().__init__()
 
     def data_op(self, data: tf.Tensor):
@@ -89,7 +90,7 @@ class Crop(DataOperation):
         :param data:
         :return:
         """
-        return tf.slice(data, [0], tf.math.minimum(self.length, tf.size(data)))
+        return tf.slice(data, self.start, tf.math.minimum(self.end, tf.size(data)) - self.start)
 
 
 class ZeroPad(DataOperation):

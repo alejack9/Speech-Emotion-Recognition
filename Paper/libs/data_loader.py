@@ -104,7 +104,7 @@ def load_datasets(df, max_sample_rate, audio_sample_seconds=8, train_val_test_pe
     data_ops.DecodeWav(with_sample_rate=True),
     data_ops.Resample(max_sample_rate),
     data_ops.Squeeze(),
-    data_ops.Crop(max_sample_rate * audio_sample_seconds),
+    data_ops.Crop(0, max_sample_rate * audio_sample_seconds),
     data_ops.ZeroPad(max_sample_rate * audio_sample_seconds),
     data_ops.CastToFloat(),
     data_ops.Reshape((max_sample_rate * audio_sample_seconds, 1)),
