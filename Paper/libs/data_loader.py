@@ -16,7 +16,7 @@ def get_dataset_information(samples_location, file_label_getter, file_speaker_ge
 
 
   df = pd.DataFrame({
-    'filenames': filenames,
+    'filename': filenames,
     'speaker': map(file_speaker_getter, filenames),
     'label': labels})
   
@@ -60,10 +60,10 @@ def load_datasets(df, max_sample_rate, audio_sample_seconds=8, train_val_test_pe
 
   for speaker in df['speaker'].unique():
     data = df[df['speaker'] == speaker]
-    for train_val_index, test_index in trainval_test_splitter.split(data['filenames'].to_numpy(), data['label'].to_numpy()):
-      train_val_candidate_f = data['filenames'].to_numpy()[train_val_index]
+    for train_val_index, test_index in trainval_test_splitter.split(data['filename'].to_numpy(), data['label'].to_numpy()):
+      train_val_candidate_f = data['filename'].to_numpy()[train_val_index]
       train_val_candidate_l = data[one_hot_column_names].to_numpy()[train_val_index]
-      test_candidate_f = data['filenames'].to_numpy()[test_index]
+      test_candidate_f = data['filename'].to_numpy()[test_index]
       test_candidate_l = data[one_hot_column_names].to_numpy()[test_index]
 
     for train_index, val_index in train_val_splitter.split(train_val_candidate_f, train_val_candidate_l):
