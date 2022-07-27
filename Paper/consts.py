@@ -1,10 +1,13 @@
+import numpy as np
+
 SEED = 0
 
 DATA_DIR = "./data/SAVEE"
-CHECKPOINT_DIR = '/public/a.giacche/checkpoints'
-LOGS_DIR = '/public/a.giacche/logs'
-LAST_EPOCH_FILE = '/public/a.giacche/lastepoch.txt'
+WORKING_DIR = './stuff'
 
-TRAIN_SIZE, VAL_SIZE, TEST_SIZE = (300, 100, 80)
+EPOCHS = 400
 
-SAMPLE_RATE_HZ = 44100
+BATCH_SIZES = np.logspace(start=5, stop=0, num=6, base=2, dtype=np.int32)
+
+LOGGING_LEVEL = "DEBUG"
+# LOGGING_LEVEL = "INFO"
