@@ -1,13 +1,12 @@
 from itertools import product
-from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard
 from tensorflow.python.framework.errors_impl import ResourceExhaustedError
 import libs.data_loader as data_loader
 import libs.model_runner as model_runner
 import libs.data_visualization as visual
-from libs.last_epoch_writer_cb import LastEpochWriterCallback
+from models.utils import get_callbacks
 import hyperparams
 from os.path import join
-import datetime
+from datetime import datetime
 import logging
 import re
 import os
@@ -39,7 +38,7 @@ def run(data_dir, working_dir, epochs, batch_sizes):
 
   data_analysis(plots_dir, df)
 
-  for model_factory, train_val_tests_percentage, seconds in product(hyperparams.model_factories, hyperparams.train_val_test_percentages, hyperparams.seconds):
+  for model_factory, train_val_tests_percentage, audio_seconds, data_ops_factory in product(hyperparams.model_factories, hyperparams.train_val_test_percentages, hyperparams.seconds, hyperparams.data_operations_factories):
     selected_batch_size_index = -1
     computed = False
     while not computed:
@@ -51,13 +50,13 @@ def run(data_dir, working_dir, epochs, batch_sizes):
         break
 
       logging.info("-------------------------")
-      logging.info(f'Model: {model_factory.get_model_name()} , seconds: {seconds} , batch_size: {batch_size}')
+      logging.info(f'Model: {model_factory.get_model_name()} , seconds: {audio_seconds} , batch_size: {batch_size} , data_operations: {data_ops_factory[0]}')
 
-      train_ds, val_ds, test_ds, additional = data_loader.load_datasets(df, max_sample_rate, audio_sample_seconds=seconds,
+      train_ds, val_ds, test_ds, additional = data_loader.load_datasets(df, max_sample_rate, data_ops_factory[1], audio_sample_seconds=audio_seconds,
         train_val_test_percentages=train_val_tests_percentage)
 
-      model = model_factory.get_model(args={"input_shape": (max_sample_rate * seconds, 1), 'print_summary': False})
-      model_name = f"m{model_factory.get_model_name()}_s{seconds}_b{batch_size}_sizes{str(train_val_tests_percentage).replace(' ', '')[1:-1]}"
+      model = model_factory.get_model(args={"input_shape": (max_sample_rate * audio_seconds, 1), 'print_summary': False})
+      model_name = f"m{model_factory.get_model_name()}_s{audio_seconds}_b{batch_size}_ops{data_ops_factory[0]}_sizes{str(train_val_tests_percentage).replace(' ', '')[1:-1]}"
       
       current_plots_dir = create_folder(join(plots_dir, model_name))
       checkpoints_dir = create_folder(join(working_dir, "checkpoints", model_name))
@@ -77,16 +76,12 @@ def run(data_dir, working_dir, epochs, batch_sizes):
         with open(last_epoch_file_path, "r") as f:
           init_epoch = int(f.readline())
 
-      logdir = join(logs_dir, datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
+      logdir = join(logs_dir, datetime.now().strftime("%Y%m%d-%H%M%S"))
 
-      checkpoint_cb = ModelCheckpoint(filepath=checkpoints_dir)
-      early_stopping_cb = EarlyStopping(patience=25)
-      tensorboard_cb = TensorBoard(logdir)
-      last_epoch_writer_cb = LastEpochWriterCallback(last_epoch_file_path)
+      cbs = get_callbacks(checkpoints_dir, logdir, last_epoch_file_path)
 
       try:
-        model_runner.run(model, train_ds, val_ds, cbs=[checkpoint_cb, tensorboard_cb, last_epoch_writer_cb, early_stopping_cb], 
-          epochs=epochs, init_epoch=init_epoch)
+        model_runner.run(model, train_ds, val_ds, cbs=cbs, epochs=epochs, init_epoch=init_epoch)
         computed = True
       except ResourceExhaustedError as e:
         logging.error("Not enough GPU memory.")
