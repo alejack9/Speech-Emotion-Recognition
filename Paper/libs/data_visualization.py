@@ -3,6 +3,8 @@ import seaborn as sns
 import numpy as np
 import pandas as pd
 import logging
+logging.getLogger('matplotlib.font_manager').disabled = True
+logging.getLogger('matplotlib.pyplot').disabled = True
 
 def show_or_save(output_file):
     if output_file == "":

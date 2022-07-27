@@ -57,7 +57,7 @@ def run(data_dir, working_dir, epochs, batch_sizes):
         train_val_test_percentages=train_val_tests_percentage)
 
       model = model_factory.get_model(args={"input_shape": (max_sample_rate * seconds, 1), 'print_summary': False})
-      model_name = f"m{model_factory.get_model_name()}_s{seconds}_b{batch_size}_sizes{str(train_val_tests_size).replace(' ', '')[1:-1]}"
+      model_name = f"m{model_factory.get_model_name()}_s{seconds}_b{batch_size}_sizes{str(train_val_tests_percentage).replace(' ', '')[1:-1]}"
       
       current_plots_dir = create_folder(join(plots_dir, model_name))
       checkpoints_dir = create_folder(join(working_dir, "checkpoints", model_name))
@@ -75,7 +75,7 @@ def run(data_dir, working_dir, epochs, batch_sizes):
       if os.path.exists(last_epoch_file_path):
         model.load_weights(checkpoints_dir)
         with open(last_epoch_file_path, "r") as f:
-          init_epoch = int(f.readline()) + 1
+          init_epoch = int(f.readline())
 
       logdir = join(logs_dir, datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
 
