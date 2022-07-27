@@ -11,7 +11,6 @@ import datetime
 import logging
 import re
 import os
-import librosa
 
 def create_folder(path):
   if not os.path.exists(path):
@@ -29,7 +28,7 @@ def get_speaker_name(file_path):
 
 def data_analysis(plots_dir, df):
   visual.plot_speakers_pie(df, output_file=join(plots_dir, "speakers_pie.png"))
-  visual.kde_plot(df['filenames'].map(lambda x: librosa.get_duration(filename=x)).rename("lengths") , output_file=join(plots_dir, "lengths_kde.png"))
+  visual.kde_plot(df['length'], output_file=join(plots_dir, "lengths_kde.png"))
 
 def run(data_dir, working_dir, epochs, batch_sizes):
   plots_dir = create_folder(join(working_dir, "plots"))

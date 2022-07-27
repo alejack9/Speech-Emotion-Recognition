@@ -7,6 +7,7 @@ import tensorflow as tf
 import tensorflow_io as tfio
 import libs.data_operations as data_ops
 import logging
+import librosa
 from consts import SEED
 
 def get_dataset_information(samples_location, file_label_getter, file_speaker_getter):
@@ -19,6 +20,7 @@ def get_dataset_information(samples_location, file_label_getter, file_speaker_ge
     'filename': filenames,
     'speaker': map(file_speaker_getter, filenames),
     'label': labels})
+  df['length'] = df['filename'].map(lambda x: librosa.get_duration(filename=x))
   
   logging.debug("Calculating max sample rate...")
   max_sample_rate = np.max(list(map(lambda file: tf.audio.decode_wav(contents=tf.io.read_file(file))[1].numpy(), filenames)))
