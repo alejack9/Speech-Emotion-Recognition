@@ -2,6 +2,7 @@ import abc
 import tensorflow as tf
 import tensorflow_io as tfio
 import os
+import logging
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 class DataOperation(abc.ABC):
@@ -20,9 +21,9 @@ class Log(DataOperation):
         self.after = after
         super().__init__()
     def data_op(self, data: tf.Tensor):
-        print(f"After '{self.after}':")
-        print(data)
-        print('---------------------')
+        logging.info(f"After '{self.after}':")
+        logging.info(data)
+        logging.info('---------------------')
         return data
 
 class ReadFile(DataOperation):

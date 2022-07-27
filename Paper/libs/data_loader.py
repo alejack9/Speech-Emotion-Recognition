@@ -1,18 +1,17 @@
-import os
+from genericpath import sameopenfile
+from os import listdir
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import StratifiedShuffleSplit
 import tensorflow as tf
 import tensorflow_io as tfio
 import libs.data_operations as data_ops
-import matplotlib.pyplot as plt
+import logging
 from consts import SEED
-
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 def get_dataset_information(samples_location, file_label_getter, file_speaker_getter):
   
-  filenames = [f'{samples_location}/{p}' for p in os.listdir(samples_location)]
+  filenames = [f'{samples_location}/{p}' for p in listdir(samples_location)]
   labels = list(map(file_label_getter, filenames))
 
 
@@ -21,17 +20,22 @@ def get_dataset_information(samples_location, file_label_getter, file_speaker_ge
     'speaker': map(file_speaker_getter, filenames),
     'label': labels})
   
+  logging.debug("Calculating max sample rate...")
   max_sample_rate = np.max(list(map(lambda file: tf.audio.decode_wav(contents=tf.io.read_file(file))[1].numpy(), filenames)))
-  
+  logging.debug("Calculating max sample rate... Done")
+
+  logging.debug("Adding dummies (one-hot encoder)...")
   df = pd.get_dummies(df['label'], prefix="label").join(df)
+  logging.debug("Adding dummies (one-hot encoder)... Done")
 
   one_hot_column_names = [col for col in df if col.startswith('label_')]
 
-  one_hot_mapper = dict([(str(list(v[:-1])).replace(']', '.]').replace(',','.'), v[-1]) for v in df[[*one_hot_column_names, 'label']].value_counts().index.values])
+  one_hot_mapper = dict([(str(list(v[:-1])).replace(']', '.]').replace(',','.'), v[-1])
+    for v in df[[*one_hot_column_names, 'label']].value_counts().index.values])
 
   return df, one_hot_mapper, max_sample_rate
 
-def load_datasets(df, one_hot_mapper, max_sample_rate, audio_sample_seconds=8, train_val_test_sizes=[0.625, 0.20833, 0.16666]):
+def load_datasets(df, max_sample_rate, audio_sample_seconds=8, train_val_test_percentages=[62.5, 20.833, 16.666]):
   
   one_hot_column_names = [col for col in df if col.startswith('label_')]
 
@@ -41,18 +45,28 @@ def load_datasets(df, one_hot_mapper, max_sample_rate, audio_sample_seconds=8, t
 
   n_speakers = len(df['speaker'].unique())
 
-  trainval_test_shuff = StratifiedShuffleSplit(n_splits=10, test_size=int(train_val_test_sizes[2] / n_speakers), random_state=SEED)
-  train_val_shuff = StratifiedShuffleSplit(n_splits=10, test_size=int(train_val_test_sizes[1] / n_speakers), random_state=SEED)
+  
+
+
+
+
+
+
+  per_speaker_test_samples = round(len(df) * train_val_test_percentages[2] / 100.0, 0) // n_speakers
+  per_speaker_val_samples = round(len(df) * train_val_test_percentages[1] / 100.0, 0) // n_speakers
+  
+  trainval_test_splitter = StratifiedShuffleSplit(n_splits=10, test_size=per_speaker_test_samples, random_state=SEED)
+  train_val_splitter = StratifiedShuffleSplit(n_splits=10, test_size=per_speaker_val_samples, random_state=SEED)
 
   for speaker in df['speaker'].unique():
     data = df[df['speaker'] == speaker]
-    for train_val_index, test_index in trainval_test_shuff.split(data['filenames'].to_numpy(), data['label'].to_numpy()):
+    for train_val_index, test_index in trainval_test_splitter.split(data['filenames'].to_numpy(), data['label'].to_numpy()):
       train_val_candidate_f = data['filenames'].to_numpy()[train_val_index]
       train_val_candidate_l = data[one_hot_column_names].to_numpy()[train_val_index]
       test_candidate_f = data['filenames'].to_numpy()[test_index]
       test_candidate_l = data[one_hot_column_names].to_numpy()[test_index]
 
-    for train_index, val_index in train_val_shuff.split(train_val_candidate_f, train_val_candidate_l):
+    for train_index, val_index in train_val_splitter.split(train_val_candidate_f, train_val_candidate_l):
       train_candidate_f = train_val_candidate_f[train_index]
       train_candidate_l = train_val_candidate_l[train_index]
       val_candidate_f = train_val_candidate_f[val_index]
@@ -71,16 +85,16 @@ def load_datasets(df, one_hot_mapper, max_sample_rate, audio_sample_seconds=8, t
   train_labels = np.reshape(train_labels, (-1, len(one_hot_column_names)))
   val_labels = np.reshape(val_labels, (-1, len(one_hot_column_names)))
 
-  print('Training set size', len(train_files))
-  print('Validation set size', len(val_files))
-  print('Test set size', len(test_files))
+  logging.info(f'Training set size: {len(train_files)}')
+  logging.info(f'Validation set size: {len(val_files)}')
+  logging.info(f'Test set size: {len(test_files)}')
 
-  print('Train sample:')
-  print(train_files[0], train_labels[0])
-  print('Val sample:')
-  print(val_files[0], val_labels[0])
-  print('Test sample:')
-  print(test_files[0], test_labels[0])
+  logging.debug('Train sample:')
+  logging.debug(f'({train_files[0]}, {train_labels[0]})')
+  logging.debug('Val sample:')
+  logging.debug(f'({val_files[0]}, {val_labels[0]})')
+  logging.debug('Test sample:')
+  logging.debug(f'({test_files[0]}, {test_labels[0]})')
 
   operations = [
     data_ops.ReadFile(),
@@ -107,6 +121,5 @@ def load_datasets(df, one_hot_mapper, max_sample_rate, audio_sample_seconds=8, t
       'complete': np.unique(df['label'], return_counts=True),
       'train': np.unique(list(map(str, train_labels)), return_counts=True),
       'val': np.unique(list(map(str, val_labels)), return_counts=True)
-    },
-    'one_hot_mapper': one_hot_mapper
+    }
   }
