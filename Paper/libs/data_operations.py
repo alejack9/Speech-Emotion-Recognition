@@ -9,25 +9,29 @@ class DataOperation(abc.ABC):
     def __init__(self):
         pass
 
-    def data_op(self, data: tf.Tensor):
+    def data_op(self, data: tf.Tensor, start, end):
         """Should never be called directly."""
         raise NotImplementedError()
 
-    def __call__(self, data: tf.Tensor, label: tf.Tensor):
-        return self.data_op(data), label
+    def __call__(self, data: tf.Tensor, label: tf.Tensor, start, end):
+        return self.data_op(data, start, end), label, start, end
+
+class RemoveCropInformation():
+    def __call__(self, data: tf.Tensor, label: tf.Tensor, start, end):
+        return data, label
 
 class Log(DataOperation):
     def __init__(self, after):
         self.after = after
         super().__init__()
-    def data_op(self, data: tf.Tensor):
+    def data_op(self, data: tf.Tensor, start, end):
         logging.info(f"After '{self.after}':")
         logging.info(data)
         logging.info('---------------------')
         return data
 
 class ReadFile(DataOperation):
-    def data_op(self, data: tf.Tensor):
+    def data_op(self, data: tf.Tensor, start, end):
         """
         `data operation` version of tf io read_file
         :param data: Tensor with filename, dtype=string
@@ -40,7 +44,7 @@ class Resample(DataOperation):
         self.rate_out = rate_out
         super().__init__()
 
-    def data_op(self, data):
+    def data_op(self, data, start, end):
         """
         Resamples the passed data (first element in the tuple) assuming that the second element is the input rate
         :param data: Tensor with dtype=string || (Tensor with dtype=string, int64)
@@ -56,7 +60,7 @@ class DecodeWav(DataOperation):
         self.with_sample_rate = with_sample_rate
         super().__init__()
 
-    def data_op(self, data: tf.Tensor):
+    def data_op(self, data: tf.Tensor, start, end):
         """
         Decode a wave file which was read by `tf.io.read_file`. If `with_sample_rate` is true, also returns the audio's sample rate
         :param data: Tensor with dtype=string
@@ -69,7 +73,7 @@ class DecodeWav(DataOperation):
 
 
 class Squeeze(DataOperation):
-    def data_op(self, data: tf.Tensor):
+    def data_op(self, data: tf.Tensor, start, end):
         """
         Drop the last dimension of a Tensor
         :param data: Tensor with dimension [x, 1]
@@ -79,18 +83,14 @@ class Squeeze(DataOperation):
 
 
 class Crop(DataOperation):
-    def __init__(self, start, end):
-        self.start = tf.constant([start])
-        self.end = tf.constant([end])
-        super().__init__()
-
-    def data_op(self, data: tf.Tensor):
+    def data_op(self, data: tf.Tensor, start, end):
         """
         Crop signal to length
         :param data:
         :return:
         """
-        return tf.slice(data, self.start, tf.math.minimum(self.end, tf.size(data)) - self.start)
+        min = tf.math.minimum(end, tf.size(data))
+        return tf.slice(data, [start], [min - start])
 
 
 class ZeroPad(DataOperation):
@@ -98,7 +98,7 @@ class ZeroPad(DataOperation):
         self.length = length
         super().__init__()
 
-    def data_op(self, data: tf.Tensor):
+    def data_op(self, data: tf.Tensor, start, end):
         """
         Add zeros to a 1D tensor to match given length
         :param data: 1D numerical tensor of length below given length
@@ -106,28 +106,24 @@ class ZeroPad(DataOperation):
         """
         return tf.concat([data, tf.zeros(self.length - tf.shape(data), dtype=tf.int16)], axis=0)
 
-
 class CastToFloat(DataOperation):
     def __init__(self):
         super().__init__()
 
-    def data_op(self, data: tf.Tensor):
+    def data_op(self, data: tf.Tensor, start, end):
         return tf.cast(data, tf.float32)
-
 
 class Normalize(DataOperation):
     def __init__(self):
         super().__init__()
 
-    def data_op(self, data: tf.Tensor):
+    def data_op(self, data: tf.Tensor, start, end):
         # 32768 is the max amplitude of wav signals 
         return data / 32768.0
-
-
 class Reshape(DataOperation):
     def __init__(self, shape):
         self.shape = shape
         super().__init__()
 
-    def data_op(self, data: tf.Tensor):
+    def data_op(self, data: tf.Tensor, start, end):
         return tf.reshape(data, self.shape)
