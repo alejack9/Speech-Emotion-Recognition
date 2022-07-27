@@ -106,15 +106,19 @@ def load_datasets(df, max_sample_rate, audio_sample_seconds=8, train_val_test_pe
     np.asarray(test_ds['end'].to_numpy()).astype('int32')
     ))
 
+  total_audio_frames = max_sample_rate * audio_sample_seconds
+
   operations = [
     data_ops.ReadFile(),
     data_ops.DecodeWav(with_sample_rate=True),
     data_ops.Resample(max_sample_rate),
     data_ops.Squeeze(),
+    data_ops.Trim(),
     data_ops.Crop(),
-    data_ops.ZeroPad(max_sample_rate * audio_sample_seconds),
+    data_ops.Fade(total_audio_frames * 0.005, total_audio_frames * 0.005),
+    data_ops.ZeroPad(total_audio_frames),
     data_ops.CastToFloat(),
-    data_ops.Reshape((max_sample_rate * audio_sample_seconds, 1)),
+    data_ops.Reshape((total_audio_frames, 1)),
     data_ops.RemoveCropInformation()
   ]
 

@@ -71,7 +71,6 @@ class DecodeWav(DataOperation):
         else:
             return tfio.audio.decode_wav(data, dtype=tf.int16), tf.cast(tf.audio.decode_wav(data)[1], tf.int64)
 
-
 class Squeeze(DataOperation):
     def data_op(self, data: tf.Tensor, start, end):
         """
@@ -80,7 +79,6 @@ class Squeeze(DataOperation):
         :return: Tensor with dimension [x, ]
         """
         return tf.squeeze(data, -1)
-
 
 class Crop(DataOperation):
     def data_op(self, data: tf.Tensor, start, end):
@@ -92,9 +90,8 @@ class Crop(DataOperation):
         min = tf.math.minimum(end, tf.size(data))
         return tf.slice(data, [start], [min - start])
 
-
 class ZeroPad(DataOperation):
-    def __init__(self, length=64_000):
+    def __init__(self, length):
         self.length = length
         super().__init__()
 
@@ -127,3 +124,20 @@ class Reshape(DataOperation):
 
     def data_op(self, data: tf.Tensor, start, end):
         return tf.reshape(data, self.shape)
+
+class Trim(DataOperation):
+    def __init__(self, epsilon=0.1):
+        self.epsilon = epsilon
+        super().__init__()
+    
+    def data_op(self, data: tf.Tensor, start, end):
+        return tfio.audio.trim(data, epsilon=self.epsilon)
+
+class Fade(DataOperation):
+    def __init__(self, fade_in, fade_out):
+        self.fade_in = fade_in
+        self.fade_out = fade_out
+        super().__init__()
+    
+    def data_op(self, data: tf.Tensor, start, end):
+        return tfio.audio.fade(data, self.fade_in, self.fade_out, mode="logarithmic")

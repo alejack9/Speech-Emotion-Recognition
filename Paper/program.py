@@ -90,4 +90,3 @@ def run(data_dir, working_dir, epochs, batch_sizes):
         computed = True
       except ResourceExhaustedError as e:
         logging.error("Not enough GPU memory.")
-        # logging.error(e)
