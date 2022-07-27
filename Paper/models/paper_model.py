@@ -1,11 +1,16 @@
-from model_factory import ModelFactory
+from models.model_factory import ModelFactory
 from tensorflow.keras.layers import Dense, Conv1D, MaxPooling1D, BatchNormalization, GlobalMaxPooling1D, Dropout
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.optimizers import Adam
-from consts import SAMPLE_RATE_HZ
+import logging
 
-class PaperModel(ModelFactory):
-  def get_model(self, args={'input_shape': (SAMPLE_RATE_HZ * 8, 1)}):
+class PaperModelFactory(ModelFactory):
+  def get_model_name(self, _={}):
+     return "PaperModel"
+
+  def get_model(self, args={'input_shape': (1, 1), "print_summary": False}):
+    '''input_shape = (sample_rate * seconds, 1)'''
+    
     filters = [32, 64, 128, 256, 512, 1024, 1024]
     sizes = [21, 19, 17, 15, 13, 11, 9]
     activation = 'relu'
@@ -36,7 +41,8 @@ class PaperModel(ModelFactory):
     # model.add(Dropout(0.2))
     model.add(Dense(7, activation='softmax'))
 
-    model.summary()
+    if args.get("print_summary", False):
+      model.summary()
 
     opt = Adam(learning_rate = 0.001, beta_1 = 0.9, beta_2 = 0.999)
     model.compile(optimizer = opt, loss = 'categorical_crossentropy', metrics=['accuracy'])
