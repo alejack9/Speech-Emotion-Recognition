@@ -37,7 +37,7 @@ def get_dataset_information(samples_location, file_label_getter, file_speaker_ge
 
   return df, one_hot_mapper, max_sample_rate
 
-def load_datasets(df, max_sample_rate, audio_sample_seconds=8, train_val_test_percentages=[62.5, 20.833, 16.666]):
+def load_datasets(df, max_sample_rate, audio_sample_seconds, data_ops_factory, train_val_test_percentages=[62.5, 20.833, 16.666]):
   
   one_hot_column_names = [col for col in df if col.startswith('label_')]
 
@@ -118,6 +118,7 @@ def load_datasets(df, max_sample_rate, audio_sample_seconds=8, train_val_test_pe
     data_ops.CastToFloat(),
     data_ops.Resample(max_sample_rate),
     data_ops.Squeeze(),
+    *data_ops_factory(total_audio_frames),
     data_ops.Crop(),
     data_ops.ZeroPad(total_audio_frames),
     data_ops.Reshape((total_audio_frames, 1)),

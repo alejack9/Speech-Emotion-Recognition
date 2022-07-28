@@ -110,3 +110,24 @@ class Reshape(DataOperation):
 
     def data_op(self, data: tf.Tensor, _, __, ___):
         return tf.reshape(data, self.shape)
+
+class Trim(DataOperation):
+    # 1% of max wav value
+    def __init__(self, epsilon=33):
+        self.epsilon = epsilon
+        super().__init__()
+    
+    def data_op(self, data: tf.Tensor, _, __, ___):
+        position = tfio.audio.trim(data, axis=0, epsilon=self.epsilon)
+        start = position[0]
+        stop = position[1]
+        return data[start:stop]
+
+class Fade(DataOperation):
+    def __init__(self, fade_in, fade_out):
+        self.fade_in = fade_in
+        self.fade_out = fade_out
+        super().__init__()
+    
+    def data_op(self, data: tf.Tensor, _, __, ___):
+        return tfio.audio.fade(data, fade_in=self.fade_in, fade_out=self.fade_out, mode="logarithmic")
