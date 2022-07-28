@@ -1,37 +1,35 @@
 import abc
 import tensorflow as tf
 import tensorflow_io as tfio
-import os
 import logging
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 class DataOperation(abc.ABC):
     def __init__(self):
         pass
 
-    def data_op(self, data: tf.Tensor, start, end):
+    def data_op(self, data: tf.Tensor, sample_rate, start, end):
         """Should never be called directly."""
         raise NotImplementedError()
 
-    def __call__(self, data: tf.Tensor, label: tf.Tensor, start, end):
-        return self.data_op(data, start, end), label, start, end
+    def __call__(self, data: tf.Tensor, label: tf.Tensor, sample_rate, start, end):
+        return self.data_op(data, sample_rate, start, end), label, sample_rate, start, end
 
-class RemoveCropInformation():
-    def __call__(self, data: tf.Tensor, label: tf.Tensor, start, end):
+class GetSampleAndLabel():
+    def __call__(self, data: tf.Tensor, label: tf.Tensor, _, __, ___):
         return data, label
 
 class Log(DataOperation):
     def __init__(self, after):
         self.after = after
         super().__init__()
-    def data_op(self, data: tf.Tensor, start, end):
+    def data_op(self, data: tf.Tensor, _, __, ___):
         logging.info(f"After '{self.after}':")
         logging.info(data)
         logging.info('---------------------')
         return data
 
 class ReadFile(DataOperation):
-    def data_op(self, data: tf.Tensor, start, end):
+    def data_op(self, data: tf.Tensor, _, __, ___):
         """
         `data operation` version of tf io read_file
         :param data: Tensor with filename, dtype=string
@@ -44,36 +42,26 @@ class Resample(DataOperation):
         self.rate_out = rate_out
         super().__init__()
 
-    def data_op(self, data, start, end):
+    def data_op(self, data, sample_rate, _, __):
         """
         Resamples the passed data (first element in the tuple) assuming that the second element is the input rate
-        :param data: Tensor with dtype=string || (Tensor with dtype=string, int64)
+        :param data: Tensor with dtype=string
         :return: Tensor with file contents, dtype=string
         """
-        if type(data) is tuple:
-            return tfio.audio.resample(data[0], data[1], self.rate_out)
-        else:
-            return data
+        return tfio.audio.resample(data, sample_rate, self.rate_out)
 
 class DecodeWav(DataOperation):
-    def __init__(self, with_sample_rate: bool):
-        self.with_sample_rate = with_sample_rate
-        super().__init__()
-
-    def data_op(self, data: tf.Tensor, start, end):
+    def data_op(self, data: tf.Tensor, _, __, ___):
         """
         Decode a wave file which was read by `tf.io.read_file`. If `with_sample_rate` is true, also returns the audio's sample rate
         :param data: Tensor with dtype=string
         :return: Tensor with dtype=string || (Tensor with dtype=string, int64)
         """
-        if not self.with_sample_rate:
-            return tfio.audio.decode_wav(data, dtype=tf.int16)
-        else:
-            return tfio.audio.decode_wav(data, dtype=tf.int16), tf.cast(tf.audio.decode_wav(data)[1], tf.int64)
+        return tfio.audio.decode_wav(data, dtype=tf.int16)
 
 
 class Squeeze(DataOperation):
-    def data_op(self, data: tf.Tensor, start, end):
+    def data_op(self, data: tf.Tensor, _, __, ___):
         """
         Drop the last dimension of a Tensor
         :param data: Tensor with dimension [x, 1]
@@ -83,7 +71,7 @@ class Squeeze(DataOperation):
 
 
 class Crop(DataOperation):
-    def data_op(self, data: tf.Tensor, start, end):
+    def data_op(self, data: tf.Tensor, _, start, end):
         """
         Crop signal to length
         :param data:
@@ -98,32 +86,27 @@ class ZeroPad(DataOperation):
         self.length = length
         super().__init__()
 
-    def data_op(self, data: tf.Tensor, start, end):
+    def data_op(self, data: tf.Tensor, _, __, ___):
         """
         Add zeros to a 1D tensor to match given length
         :param data: 1D numerical tensor of length below given length
         :return: 1D numerical tensor of given length
         """
-        return tf.concat([data, tf.zeros(self.length - tf.shape(data), dtype=tf.int16)], axis=0)
+        return tf.concat([data, tf.zeros(self.length - tf.shape(data), dtype=data.dtype)], axis=0)
 
 class CastToFloat(DataOperation):
-    def __init__(self):
-        super().__init__()
-
-    def data_op(self, data: tf.Tensor, start, end):
+    def data_op(self, data: tf.Tensor, _, __, ___):
         return tf.cast(data, tf.float32)
 
 class Normalize(DataOperation):
-    def __init__(self):
-        super().__init__()
-
-    def data_op(self, data: tf.Tensor, start, end):
+    def data_op(self, data: tf.Tensor, _, __, ___):
         # 32768 is the max amplitude of wav signals 
         return data / 32768.0
+
 class Reshape(DataOperation):
     def __init__(self, shape):
         self.shape = shape
         super().__init__()
 
-    def data_op(self, data: tf.Tensor, start, end):
+    def data_op(self, data: tf.Tensor, _, __, ___):
         return tf.reshape(data, self.shape)

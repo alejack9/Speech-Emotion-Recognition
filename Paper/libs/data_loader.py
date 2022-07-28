@@ -20,9 +20,10 @@ def get_dataset_information(samples_location, file_label_getter, file_speaker_ge
     'speaker': map(file_speaker_getter, filenames),
     'label': labels})
   df['length'] = df['filename'].map(lambda x: librosa.get_duration(filename=x))
-  
+  df['sample_rate'] = df['filename'].map(librosa.get_samplerate)
+
   logging.debug("Calculating max sample rate...")
-  max_sample_rate = np.max(list(map(lambda file: tf.audio.decode_wav(contents=tf.io.read_file(file))[1].numpy(), filenames)))
+  max_sample_rate = df['sample_rate'].max()
   logging.debug("Calculating max sample rate... Done")
 
   logging.debug("Adding dummies (one-hot encoder)...")
@@ -90,32 +91,37 @@ def load_datasets(df, max_sample_rate, audio_sample_seconds=8, train_val_test_pe
   train_tf_ds = tfio.audio.AudioIODataset.from_tensor_slices((
     train_ds['filename'].to_numpy(),
     train_ds[one_hot_column_names].to_numpy(),
+    train_ds['sample_rate'].to_numpy(),
     np.asarray(train_ds['start'].to_numpy()).astype('int32'),
     np.asarray(train_ds['end'].to_numpy()).astype('int32')
     ))
   val_tf_ds = tfio.audio.AudioIODataset.from_tensor_slices((
     val_ds['filename'].to_numpy(),
     val_ds[one_hot_column_names].to_numpy(),
+    val_ds['sample_rate'].to_numpy(),
     np.asarray(val_ds['start'].to_numpy()).astype('int32'),
     np.asarray(val_ds['end'].to_numpy()).astype('int32')
     ))
   test_tf_ds = tfio.audio.AudioIODataset.from_tensor_slices((
     test_ds['filename'].to_numpy(),
     test_ds[one_hot_column_names].to_numpy(),
+    test_ds['sample_rate'].to_numpy(),
     np.asarray(test_ds['start'].to_numpy()).astype('int32'),
     np.asarray(test_ds['end'].to_numpy()).astype('int32')
     ))
 
+  total_audio_frames = max_sample_rate * audio_sample_seconds
+
   operations = [
     data_ops.ReadFile(),
-    data_ops.DecodeWav(with_sample_rate=True),
+    data_ops.DecodeWav(),
+    data_ops.CastToFloat(),
     data_ops.Resample(max_sample_rate),
     data_ops.Squeeze(),
     data_ops.Crop(),
-    data_ops.ZeroPad(max_sample_rate * audio_sample_seconds),
-    data_ops.CastToFloat(),
-    data_ops.Reshape((max_sample_rate * audio_sample_seconds, 1)),
-    data_ops.RemoveCropInformation()
+    data_ops.ZeroPad(total_audio_frames),
+    data_ops.Reshape((total_audio_frames, 1)),
+    data_ops.GetSampleAndLabel()
   ]
 
   for o in operations:

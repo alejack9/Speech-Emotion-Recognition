@@ -39,12 +39,12 @@ def plot_audio_waves(train_ds, one_hot_mapper, rows=3, cols=3, output_file=""):
     _, axes = plt.subplots(rows, cols, figsize=(12, 15))
 
     for i, (audio, label) in enumerate(train_ds.take(n)):
-     r = i // cols
-     c = i % cols
-     ax = axes[r][c]
-     ax.plot(audio.numpy())
-     label = one_hot_mapper.get(np.array_str(label.numpy()), np.array_str(label.numpy()))
-     ax.set_title(label)
+        r = i // cols
+        c = i % cols
+        ax = axes[r][c]
+        ax.plot(audio.numpy())
+        label = one_hot_mapper.get(np.array_str(label.numpy()), np.array_str(label.numpy()))
+        ax.set_title(label)
 
     show_or_save(output_file)
 

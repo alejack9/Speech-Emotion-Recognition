@@ -4,7 +4,6 @@ from tensorflow.python.framework.errors_impl import ResourceExhaustedError
 import libs.data_loader as data_loader
 import libs.model_runner as model_runner
 import libs.data_visualization as visual
-from models.last_epoch_writer_cb import LastEpochWriterCallback
 from models.callbacks import get_callbacks
 import hyperparams
 from os.path import join
@@ -87,4 +86,3 @@ def run(data_dir, working_dir, epochs, batch_sizes):
         computed = True
       except ResourceExhaustedError as e:
         logging.error("Not enough GPU memory.")
-        # logging.error(e)
