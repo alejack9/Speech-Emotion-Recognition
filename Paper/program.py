@@ -38,7 +38,7 @@ def run(data_dir, working_dir, epochs, batch_sizes):
 
   data_analysis(plots_dir, df)
 
-  for model_factory, train_val_tests_percentage, audio_seconds, (data_ops_name, data_ops_factory) in product(hyperparams.model_factories, hyperparams.train_val_test_percentages, hyperparams.seconds, hyperparams.data_operations_factories):
+  for model_factory, train_val_tests_percentage, audio_seconds, (data_ops_name, data_ops_factory), patience in product(hyperparams.model_factories, hyperparams.train_val_test_percentages, hyperparams.seconds, hyperparams.data_operations_factories, hyperparams.patiences):
     selected_batch_size_index = -1
     computed = False
     while not computed:
@@ -50,14 +50,14 @@ def run(data_dir, working_dir, epochs, batch_sizes):
         break
 
       logging.info("-------------------------")
-      logging.info(f'Model: {model_factory.get_model_name()} , seconds: {audio_seconds} , batch_size: {batch_size} , data_ops: {data_ops_name}')
+      logging.info(f'Model: {model_factory.get_model_name()} , seconds: {audio_seconds} , batch_size: {batch_size} , early_stopping_patience: {patience} data_ops: {data_ops_name}')
 
       train_ds, val_ds, test_ds, additional = data_loader.load_datasets(df,
         max_sample_rate, audio_seconds,
         data_ops_factory, train_val_tests_percentage)
 
       model = model_factory.get_model(args={"input_shape": (max_sample_rate * audio_seconds, 1), 'print_summary': False})
-      model_name = f"m{model_factory.get_model_name()}_s{audio_seconds}_b{batch_size}_o_{data_ops_name}_sz{str(train_val_tests_percentage).replace(' ', '')[1:-1]}"
+      model_name = f"m{model_factory.get_model_name()}_s{audio_seconds}_b{batch_size}_p{patience}_o_{data_ops_name}_sz{str(train_val_tests_percentage).replace(' ', '')[1:-1]}"
       
       current_plots_dir = create_folder(join(plots_dir, model_name))
       checkpoints_dir = create_folder(join(working_dir, "checkpoints", model_name))
@@ -79,7 +79,7 @@ def run(data_dir, working_dir, epochs, batch_sizes):
 
       logdir = join(logs_dir, datetime.now().strftime("%Y%m%d-%H%M%S"))
 
-      cbs = get_callbacks(checkpoints_dir, logdir, last_epoch_file_path)
+      cbs = get_callbacks(checkpoints_dir, logdir, last_epoch_file_path, patience)
 
       try:
         model_runner.run(model, train_ds, val_ds, cbs=cbs, epochs=epochs, init_epoch=init_epoch)
