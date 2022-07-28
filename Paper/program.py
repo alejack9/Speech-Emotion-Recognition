@@ -25,9 +25,10 @@ def data_analysis(plots_dir, df):
   visual.plot_speakers_pie(df, output_file=join(plots_dir, "speakers_pie.png"))
   visual.kde_plot(df['length'], output_file=join(plots_dir, "lengths_kde.png"))
 
-def run(data_dir, working_dir, completed_models_dir, epochs, batch_sizes):
+def run(data_dir, working_dir, epochs, batch_sizes):
   plots_dir = create_folder(join(working_dir, "plots"))
-  
+  completed_models_dir = create_folder(join(working_dir, "done"))
+
   logging.info("Loading data...")
   df, one_hot_mapper, max_sample_rate = data_loader.get_dataset_information(data_dir, get_label, get_speaker_name)
   logging.info("Loading data... done")
@@ -54,6 +55,7 @@ def run(data_dir, working_dir, completed_models_dir, epochs, batch_sizes):
 
       model = model_factory.get_model(args={"input_shape": (max_sample_rate * audio_seconds, 1), 'print_summary': False})
       model_name = f"m{model_factory.get_model_name()}_s{audio_seconds}_b{batch_size}_p{patience}_o_{data_ops_name}_sz{str(train_val_tests_percentage).replace(' ', '')[1:-1]}"
+
       done_model_path = join(completed_models_dir, model_name)
 
       if os.path.exists(done_model_path):
@@ -63,7 +65,7 @@ def run(data_dir, working_dir, completed_models_dir, epochs, batch_sizes):
       
       current_plots_dir = create_folder(join(plots_dir, model_name))
       checkpoints_dir = create_folder(join(working_dir, "checkpoints", model_name))
-      logs_dir = create_folder(join(working_dir, "logs", model_name))
+      logs_dir = create_folder(join(working_dir, "logs", model_name, datetime.now().strftime("%Y%m%d-%H%M%S")))
       last_epoch_file_path = join(create_folder(join(working_dir, "last_epochs")), f"{model_name}.txt")
 
       visual.plot_labels_distribution(additional['labels_distribution'], one_hot_mapper, output_file=join(current_plots_dir, "labels_distribution.png"))

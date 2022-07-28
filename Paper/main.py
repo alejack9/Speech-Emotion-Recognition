@@ -17,4 +17,4 @@ np.random.seed(SEED)
 logging.getLogger().setLevel(LOGGING_LEVEL)
 logging.basicConfig(format='%(asctime)s - %(levelname)s: %(message)s', datefmt='%H:%M:%S')
 
-program.run(DATA_DIR, join(WORKING_DIR, datetime.now().strftime("%Y%m%d-%H%M%S")), create_folder(join(WORKING_DIR, "done")), EPOCHS, BATCH_SIZES)
+program.run(DATA_DIR, WORKING_DIR, EPOCHS, BATCH_SIZES)
