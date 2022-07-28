@@ -42,7 +42,7 @@ def run(data_dir, working_dir, epochs, batch_sizes):
     selected_batch_size_index = -1
     computed = False
     while not computed:
-      if selected_batch_size_index < len(batch_sizes):
+      if selected_batch_size_index < len(batch_sizes) - 1:
         selected_batch_size_index = selected_batch_size_index + 1
         batch_size = batch_sizes[selected_batch_size_index]
       else:
