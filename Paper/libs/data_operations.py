@@ -44,7 +44,7 @@ class Resample(DataOperation):
 
     def data_op(self, data, sample_rate, _, __):
         """
-        Resamples the passed data (first element in the tuple) assuming that the second element is the input rate
+        Resamples the passed data
         :param data: Tensor with dtype=string
         :return: Tensor with file contents, dtype=string
         """
@@ -53,7 +53,7 @@ class Resample(DataOperation):
 class DecodeWav(DataOperation):
     def data_op(self, data: tf.Tensor, _, __, ___):
         """
-        Decode a wave file which was read by `tf.io.read_file`. If `with_sample_rate` is true, also returns the audio's sample rate
+        Decode a wave file which was read by `tf.io.read_file`
         :param data: Tensor with dtype=string
         :return: Tensor with dtype=string || (Tensor with dtype=string, int64)
         """
@@ -110,8 +110,8 @@ class Reshape(DataOperation):
 
 class Trim(DataOperation):
     # 1% of max wav value
-    def __init__(self, epsilon=33):
-        self.epsilon = epsilon
+    def __init__(self, epsilon=0.01):
+        self.epsilon = round(32768.0 * epsilon)
         super().__init__()
     
     def data_op(self, data: tf.Tensor, _, __, ___):

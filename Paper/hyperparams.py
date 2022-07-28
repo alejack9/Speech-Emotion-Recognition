@@ -11,11 +11,13 @@ seconds = [3, 4, 5, 8]
 train_val_test_percentages = [(62.5, 20.833, 16.666)]
 
 data_operations_factories = [
-  ('trim', lambda _: [
-    data_ops.Trim(),
+  ('trim01', lambda _: [
+    data_ops.Trim(epsilon=.01),
   ]),
+  # ('trim05', lambda _: [
+  #   data_ops.Trim(epsilon=.05),
+  # ]),
   # ('fade05', lambda total_audio_frames: [
-  #   data_ops.CastToFloat(),
   #   data_ops.Fade(total_audio_frames * 0.05, total_audio_frames * 0.05),
   # ]),
   # ('trim_fade05', lambda total_audio_frames: [
@@ -25,6 +27,6 @@ data_operations_factories = [
   # ('trim_crop_fade05', lambda total_audio_frames: [
   #   data_ops.Trim(),
   #   data_ops.Crop(),
-  #   data_ops.Fade(round(total_audio_frames * 0.05), round(total_audio_frames * 0.05)),
+  #   data_ops.Fade(total_audio_frames * 0.05, total_audio_frames * 0.05),
   # ])
 ]
