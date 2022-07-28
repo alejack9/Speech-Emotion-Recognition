@@ -59,7 +59,6 @@ class DecodeWav(DataOperation):
         """
         return tfio.audio.decode_wav(data, dtype=tf.int16)
 
-
 class Squeeze(DataOperation):
     def data_op(self, data: tf.Tensor, _, __, ___):
         """
@@ -68,7 +67,6 @@ class Squeeze(DataOperation):
         :return: Tensor with dimension [x, ]
         """
         return tf.squeeze(data, -1)
-
 
 class Crop(DataOperation):
     def data_op(self, data: tf.Tensor, _, start, end):
@@ -80,9 +78,8 @@ class Crop(DataOperation):
         min = tf.math.minimum(end, tf.size(data))
         return tf.slice(data, [start], [min - start])
 
-
 class ZeroPad(DataOperation):
-    def __init__(self, length=64_000):
+    def __init__(self, length):
         self.length = length
         super().__init__()
 
