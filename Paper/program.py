@@ -3,6 +3,7 @@ from tensorflow.python.framework.errors_impl import ResourceExhaustedError
 import libs.data_loader as data_loader
 import libs.model_runner as model_runner
 import libs.data_visualization as visual
+from libs.utils import create_folder
 from models.callbacks import get_callbacks
 import hyperparams
 from os.path import join
@@ -10,11 +11,6 @@ from datetime import datetime
 import logging
 import re
 import os
-
-def create_folder(path):
-  if not os.path.exists(path):
-    os.makedirs(path)
-  return path
 
 def get_label(file_path):
   parts = re.sub('.+\_|[0-9]+.wav', '', file_path)
@@ -29,9 +25,9 @@ def data_analysis(plots_dir, df):
   visual.plot_speakers_pie(df, output_file=join(plots_dir, "speakers_pie.png"))
   visual.kde_plot(df['length'], output_file=join(plots_dir, "lengths_kde.png"))
 
-def run(data_dir, working_dir, epochs, batch_sizes):
+def run(data_dir, working_dir, completed_models_dir, epochs, batch_sizes):
   plots_dir = create_folder(join(working_dir, "plots"))
-
+  
   logging.info("Loading data...")
   df, one_hot_mapper, max_sample_rate = data_loader.get_dataset_information(data_dir, get_label, get_speaker_name)
   logging.info("Loading data... done")
@@ -58,6 +54,12 @@ def run(data_dir, working_dir, epochs, batch_sizes):
 
       model = model_factory.get_model(args={"input_shape": (max_sample_rate * audio_seconds, 1), 'print_summary': False})
       model_name = f"m{model_factory.get_model_name()}_s{audio_seconds}_b{batch_size}_p{patience}_o_{data_ops_name}_sz{str(train_val_tests_percentage).replace(' ', '')[1:-1]}"
+      done_model_path = join(completed_models_dir, model_name)
+
+      if os.path.exists(done_model_path):
+        logging.info("Model already computed.")
+        computed = True
+        break
       
       current_plots_dir = create_folder(join(plots_dir, model_name))
       checkpoints_dir = create_folder(join(working_dir, "checkpoints", model_name))
@@ -86,3 +88,6 @@ def run(data_dir, working_dir, epochs, batch_sizes):
         computed = True
       except ResourceExhaustedError:
         logging.error("Not enough GPU memory.")
+
+      if computed == True:
+        open(done_model_path, "w+").close()
