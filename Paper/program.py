@@ -5,7 +5,7 @@ import libs.model_runner as model_runner
 import libs.data_visualization as visual
 from libs.utils import create_folder
 from models.callbacks import get_callbacks
-import hyperparams
+from hyperparams import total as total_pars, combinations as hyperparams
 from os.path import join
 from datetime import datetime
 import logging
@@ -26,6 +26,7 @@ def data_analysis(plots_dir, df):
   visual.kde_plot(df['length'], output_file=join(plots_dir, "lengths_kde.png"))
 
 def run(data_dir, working_dir, epochs, batch_sizes):
+
   plots_dir = create_folder(join(working_dir, "plots"))
   completed_models_dir = create_folder(join(working_dir, "done"))
 
@@ -35,18 +36,11 @@ def run(data_dir, working_dir, epochs, batch_sizes):
 
   data_analysis(plots_dir, df)
 
-  for model_factory, train_val_tests_percentage, audio_seconds, (data_ops_name, data_ops_factory), patience in product(hyperparams.model_factories, hyperparams.train_val_test_percentages, hyperparams.seconds, hyperparams.data_operations_factories, hyperparams.patiences):
-    selected_batch_size_index = -1
+  for i, (model_factory, train_val_tests_percentage, audio_seconds, (data_ops_name, data_ops_factory), patience) in enumerate(product(hyperparams['model_factories'], hyperparams['train_val_test_percentages'], hyperparams['seconds'], hyperparams['data_operations_factories'], hyperparams['patiences'])):
     computed = False
-    while not computed:
-      if selected_batch_size_index < len(batch_sizes) - 1:
-        selected_batch_size_index = selected_batch_size_index + 1
-        batch_size = batch_sizes[selected_batch_size_index]
-      else:
-        logging.critical("No batch size is suitable for this hardware. Trying next hyper-parameters configuration.")
-        break
-
-      logging.info("-------------------------")
+    
+    for j, batch_size in enumerate(batch_sizes):
+      logging.info(f"------------- Trying batch size {j + 1} / {len(batch_sizes)} ({round((j + 1) / float(len(batch_sizes)) * 100, 2)}%) ------------")
       logging.info(f'Model: {model_factory.get_model_name()} , seconds: {audio_seconds} , batch_size: {batch_size} , early_stopping_patience: {patience} data_ops: {data_ops_name}')
 
       train_ds, val_ds, test_ds, additional = data_loader.load_datasets(df,
@@ -93,3 +87,8 @@ def run(data_dir, working_dir, epochs, batch_sizes):
 
       if computed == True:
         open(done_model_path, "w+").close()
+
+    if not computed:
+      logging.critical("No batch size is suitable for this hardware. Trying next hyper-parameters configuration.")
+
+    logging.info(f"-------------------- {str(i + 1).rjust(len(str(total_pars)), ' ')} / {total_pars} ({round((i + 1) / float(total_pars) * 100, 2)}%) --------------------")
