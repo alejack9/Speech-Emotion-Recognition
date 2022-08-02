@@ -12,6 +12,7 @@ class CustomModelFactory(ModelFactory):
 
     def setHyperparams(self, hp):
         self.hp = hp
+        
 
     def get_model(self, args={'input_shape': (1, 1), "print_summary": False, }):
         '''input_shape = (sample_rate * seconds, 1)'''

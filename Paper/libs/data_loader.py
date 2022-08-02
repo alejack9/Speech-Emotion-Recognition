@@ -91,16 +91,16 @@ def load_datasets(df, max_sample_rate, audio_sample_seconds, data_ops_factory, t
     logging.info(f'Training set size: {len(train_ds)}')
     logging.info(f'Validation set size: {len(val_ds)}')
     logging.info(f'Test set size: {len(test_ds)}')
-    exit()
-    # logging.debug('Train sample:')
-    # logging.debug(
-    #     f"({train_ds['filename'].iloc[0]}, {train_ds[one_hot_column_names].iloc[0]})")
-    # logging.debug('Val sample:')
-    # logging.debug(
-    #     f"({val_ds['filename'].iloc[0]}, {val_ds[one_hot_column_names].iloc[0]})")
-    # logging.debug('Test sample:')
-    # logging.debug(
-    #     f"({test_ds['filename'].iloc[0]}, {test_ds[one_hot_column_names].iloc[0]})")
+
+    logging.debug('Train sample:')
+    logging.debug(
+        f"({train_ds['filename'].iloc[0]}, {train_ds[one_hot_column_names].iloc[0]})")
+    logging.debug('Val sample:')
+    logging.debug(
+        f"({val_ds['filename'].iloc[0]}, {val_ds[one_hot_column_names].iloc[0]})")
+    logging.debug('Test sample:')
+    logging.debug(
+        f"({test_ds['filename'].iloc[0]}, {test_ds[one_hot_column_names].iloc[0]})")
 
     train_tf_ds = tfio.audio.AudioIODataset.from_tensor_slices((
         train_ds['filename'].to_numpy(),
