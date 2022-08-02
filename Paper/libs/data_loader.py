@@ -55,8 +55,9 @@ def load_datasets(df, max_sample_rate, audio_sample_seconds, data_ops_factory, t
         lambda x: np.arange(0, x, audio_sample_seconds))
     df['end'] = df['start'].map(lambda x: x + audio_sample_seconds)
     df = df.explode(['start', 'end'])
-    # if length - start >= audio_sample_seconds / 2 => tieni
-    df = df[df["length"] - df['start'] >= audio_sample_seconds / 2]
+    # if start == 0 || length - start >= audio_sample_seconds / 2 => tieni
+    df = df[(df['start'] == 0) | (df["length"] -
+                                  df['start'] >= audio_sample_seconds / 2)]
     df['start'] = df['start'].map(lambda x: x * max_sample_rate)
     df['end'] = df['end'].map(lambda x: x * max_sample_rate)
 
@@ -90,7 +91,7 @@ def load_datasets(df, max_sample_rate, audio_sample_seconds, data_ops_factory, t
     logging.info(f'Training set size: {len(train_ds)}')
     logging.info(f'Validation set size: {len(val_ds)}')
     logging.info(f'Test set size: {len(test_ds)}')
-
+    exit()
     # logging.debug('Train sample:')
     # logging.debug(
     #     f"({train_ds['filename'].iloc[0]}, {train_ds[one_hot_column_names].iloc[0]})")
