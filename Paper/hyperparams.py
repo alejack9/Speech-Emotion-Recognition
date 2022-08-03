@@ -38,6 +38,40 @@ combinations = {
       data_ops.Crop(),
       data_ops.Fade(total_audio_frames * 0.15, total_audio_frames * 0.15),
     ]),
+    ('crop_norm', lambda _: [
+        data_ops.Crop(),
+        data_ops.Normalize()
+    ]),
+    ('fade05_crop_norm', lambda total_audio_frames: [
+      data_ops.Fade(total_audio_frames * 0.05, total_audio_frames * 0.05),
+      data_ops.Crop(),
+      data_ops.Normalize()
+    ]),
+    ('fade10_crop_norm', lambda total_audio_frames: [
+      data_ops.Fade(total_audio_frames * 0.10, total_audio_frames * 0.10),
+      data_ops.Crop(),
+      data_ops.Normalize()
+    ]),
+    ('fade15_crop_norm', lambda total_audio_frames: [
+      data_ops.Fade(total_audio_frames * 0.15, total_audio_frames * 0.15),
+      data_ops.Crop(),
+      data_ops.Normalize()
+    ]),
+    ('crop_fade05_norm', lambda total_audio_frames: [
+      data_ops.Crop(),
+      data_ops.Fade(total_audio_frames * 0.05, total_audio_frames * 0.05),
+      data_ops.Normalize()
+    ]),
+    ('crop_fade10_norm', lambda total_audio_frames: [
+      data_ops.Crop(),
+      data_ops.Fade(total_audio_frames * 0.10, total_audio_frames * 0.10),
+      data_ops.Normalize()
+    ]),
+    ('crop_fade15_norm', lambda total_audio_frames: [
+      data_ops.Crop(),
+      data_ops.Fade(total_audio_frames * 0.15, total_audio_frames * 0.15),
+      data_ops.Normalize()
+    ]),
   ]
 }
 
