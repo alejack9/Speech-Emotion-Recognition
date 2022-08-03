@@ -1,7 +1,10 @@
 import libs.data_operations as data_ops
 from models.custom_model import CustomModelFactory
 from models.paper_model import PaperModelFactory
+from models.regularized_paper_model import RegularizedPaperModelFactory
+
 import libs.data_operations as data_ops
+
 from functools import reduce
 from itertools import product
 
@@ -11,8 +14,6 @@ from itertools import product
 no_conv_layers = [2, 3, 4]
 no_filters = [32, 64, 128, 256]
 filter_sizes = [3, 9, 12]
-
-# def getLayersConf():
 
 pool_sizes = [2, 4]
 no_fc_layers = [2, 3]
@@ -25,7 +26,6 @@ dropouts = [0]
 learning_rates = [0.001]
 b1s = [0.9]
 b2s = [0.999]
-
 
 def _getCustomModel(hp):
     model = CustomModelFactory()
@@ -51,10 +51,24 @@ def getCustomModels():
             }) for (nc, nfc, fc_n, nfil, fsz, psz, act, d, lr, b1, b2) in combinations]
 
 
+
+regDrops = [0.2, 0.5]
+regL2s = [0.01, 0.001]
+
+def _getRegPaperModel(drop, l2):
+    model = RegularizedPaperModelFactory()
+    model.set_conf(dropout=drop, l2=l2)
+    return model
+
+def getRegularizedPaperModels():
+    return [_getRegPaperModel(drop, l2) for (drop, l2) in product(regDrops, regL2s)]
+
+
 combinations = {
     'model_factories': [
         # PaperModelFactory(),
-        *getCustomModels()
+        # *getCustomModels()
+        *getRegularizedPaperModels()
     ],
     'seconds': [3, 4, 5, 8],
     'patiences': [80],
