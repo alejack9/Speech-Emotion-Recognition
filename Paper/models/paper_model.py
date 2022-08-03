@@ -1,5 +1,5 @@
 from models.model_factory import ModelFactory
-from tensorflow.keras.layers import Dense, Conv1D, MaxPooling1D, BatchNormalization, GlobalMaxPooling1D, Dropout
+from tensorflow.keras.layers import Dense, Conv1D, MaxPooling1D, BatchNormalization, GlobalMaxPooling1D, Dropout, Flatten
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.optimizers import Adam
 import logging
@@ -8,7 +8,7 @@ class PaperModelFactory(ModelFactory):
   def get_model_name(self, _={}):
      return "PaperModel"
 
-  def get_model(self, args={'input_shape': (1, 1), "print_summary": False}):
+  def get_model(self, args={'input_shape': (1, 1), "print_summary": False, 'dropout': 0.0}):
     '''input_shape = (sample_rate * seconds, 1)'''
     
     filters = [32, 64, 128, 256, 512, 1024, 1024]
@@ -35,11 +35,15 @@ class PaperModelFactory(ModelFactory):
     model.add(BatchNormalization())
     model.add(GlobalMaxPooling1D())
 
-    # model.add(Flatten())
-    # model.add(Dropout(0.2))
-    model.add(Dense(128, activation=activation))
-    # model.add(Dropout(0.2))
-    model.add(Dense(7, activation='softmax'))
+    if args.get('dropout', 0.0) != 0.0:
+      model.add(Flatten())
+      model.add(Dropout(args['dropout']))
+      model.add(Dense(128, activation=activation))
+      model.add(Dropout(args['dropout']))
+      model.add(Dense(7, activation='softmax'))
+    else:
+      model.add(Dense(128, activation=activation))
+      model.add(Dense(7, activation='softmax'))
 
     if args.get("print_summary", False):
       model.summary()

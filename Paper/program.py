@@ -36,7 +36,7 @@ def run(data_dir, working_dir, epochs, batch_sizes):
 
   data_analysis(plots_dir, df)
 
-  for i, (model_factory, train_val_tests_percentage, audio_seconds, (data_ops_name, data_ops_factory), patience) in enumerate(product(hyperparams['model_factories'], hyperparams['train_val_test_percentages'], hyperparams['seconds'], hyperparams['data_operations_factories'], hyperparams['patiences'])):
+  for i, (model_factory, train_val_tests_percentage, audio_seconds, (data_ops_name, data_ops_factory), patience, dropout) in enumerate(product(hyperparams['model_factories'], hyperparams['train_val_test_percentages'], hyperparams['seconds'], hyperparams['data_operations_factories'], hyperparams['patiences'], hyperparams['dropouts'])):
     computed = False
     
     for j, batch_size in enumerate(batch_sizes):
@@ -47,8 +47,8 @@ def run(data_dir, working_dir, epochs, batch_sizes):
         max_sample_rate, audio_seconds,
         data_ops_factory, train_val_tests_percentage)
 
-      model = model_factory.get_model(args={"input_shape": (max_sample_rate * audio_seconds, 1), 'print_summary': False})
-      model_name = f"m{model_factory.get_model_name()}_s{audio_seconds}_b{batch_size}_p{patience}_o_{data_ops_name}_sz{str(train_val_tests_percentage).replace(' ', '')[1:-1]}"
+      model = model_factory.get_model(args={"input_shape": (max_sample_rate * audio_seconds, 1), 'dropout': dropout, 'print_summary': False})
+      model_name = f"m{model_factory.get_model_name()}_s{audio_seconds}_b{batch_size}_d{dropout}_p{patience}_o_{data_ops_name}_sz{str(train_val_tests_percentage).replace(' ', '')[1:-1]}"
 
       done_model_path = join(completed_models_dir, model_name)
 
