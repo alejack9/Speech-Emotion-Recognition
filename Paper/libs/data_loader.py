@@ -45,14 +45,15 @@ def load_datasets(df, max_sample_rate, audio_sample_seconds, data_ops_factory, t
 
   # Add samples splitting the duration
 
-  df['start'] = df['length'].map(lambda x: np.arange(0, x, audio_sample_seconds))
+  df['start'] = df['length'].map(
+      lambda x: np.arange(0, x, audio_sample_seconds))
   df['end'] = df['start'].map(lambda x: x + audio_sample_seconds)
   df = df.explode(['start', 'end'])
-  # if length - start >= audio_sample_seconds / 2 => tieni
-  df = df[df["length"] - df['start'] >= audio_sample_seconds / 2]
+  # if start == 0 || length - start >= audio_sample_seconds / 2 => tieni
+  df = df[(df['start'] == 0) | (df["length"] -
+                                df['start'] >= audio_sample_seconds / 2)]
   df['start'] = df['start'].map(lambda x: x * max_sample_rate)
   df['end'] = df['end'].map(lambda x: x * max_sample_rate)
-
 
   per_speaker_test_samples = int(round(len(df) * train_val_test_percentages[2] / 100.0, 0) // n_speakers)
   per_speaker_val_samples = int(round(len(df) * train_val_test_percentages[1] / 100.0, 0) // n_speakers)
@@ -89,12 +90,12 @@ def load_datasets(df, max_sample_rate, audio_sample_seconds, data_ops_factory, t
   logging.debug(f"({test_ds['filename'].iloc[0]}, {test_ds[one_hot_column_names].iloc[0]})")
 
   train_tf_ds = tfio.audio.AudioIODataset.from_tensor_slices((
-    train_ds['filename'].to_numpy(),
-    train_ds[one_hot_column_names].to_numpy(),
-    train_ds['sample_rate'].to_numpy(),
-    np.asarray(train_ds['start'].to_numpy()).astype('int32'),
-    np.asarray(train_ds['end'].to_numpy()).astype('int32')
-    ))
+      train_ds['filename'].to_numpy(),
+      train_ds[one_hot_column_names].to_numpy(),
+      train_ds['sample_rate'].to_numpy(),
+      np.asarray(train_ds['start'].to_numpy()).astype('int32'),
+      np.asarray(train_ds['end'].to_numpy()).astype('int32')
+  ))
   val_tf_ds = tfio.audio.AudioIODataset.from_tensor_slices((
     val_ds['filename'].to_numpy(),
     val_ds[one_hot_column_names].to_numpy(),
