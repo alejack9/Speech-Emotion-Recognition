@@ -10,7 +10,7 @@ import logging
 
 class PaperModelFactory(ModelFactory):
   def get_model_name(self, _={}):
-     return "PaperModelRegularized"
+     return f"PaperModelRegularized_d{self.dropout}_l2{str(self.l2_factor).spli('.')[1]}"
 
   def set_conf(self, dropout = 0.2, l2 = 0.01):
     self.dropout = dropout
