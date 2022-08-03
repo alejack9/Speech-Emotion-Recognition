@@ -77,11 +77,13 @@ def load_datasets(df, max_sample_rate, audio_sample_seconds, data_ops_factory, t
     train_ds = pd.concat([train_ds, speaker_train_ds])
     val_ds = pd.concat([val_ds, speaker_val_ds])
     test_ds = pd.concat([test_ds, speaker_test_ds])
-    
+
+  logging.debug(f'Total samples: {len(df)}')
+
   logging.info(f'Training set size: {len(train_ds)}')
   logging.info(f'Validation set size: {len(val_ds)}')
   logging.info(f'Test set size: {len(test_ds)}')
-
+  
   logging.debug('Train sample:')
   logging.debug(f"({train_ds['filename'].iloc[0]}, {train_ds[one_hot_column_names].iloc[0]})")
   logging.debug('Val sample:')
