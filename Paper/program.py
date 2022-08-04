@@ -87,6 +87,7 @@ def run(data_dir, working_dir, epochs, batch_sizes):
 
       if computed == True:
         open(done_model_path, "w+").close()
+        break
 
     if not computed:
       logging.critical("No batch size is suitable for this hardware. Trying next hyper-parameters configuration.")
