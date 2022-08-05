@@ -55,13 +55,13 @@ def getCustomModels():
 regDrops = [0.2, 0.5]
 regL2s = [0.01, 0.001]
 
-def _getRegPaperModel(drop, l2):
+def _getRegPaperModel(drop = None, l2 = None):
     model = RegularizedPaperModelFactory()
     model.set_conf(dropout=drop, l2=l2)
     return model
 
 def getRegularizedPaperModels():
-    return [_getRegPaperModel(drop, l2) for (drop, l2) in product(regDrops, regL2s)]
+    return [_getRegPaperModel(drop = drop, l2= l2) for (drop, l2) in product(regDrops, regL2s)]
 
 def getRegularizedPaperModelsDropOnly():
     return [_getRegPaperModel(drop= drop) for drop in regDrops]
@@ -73,7 +73,7 @@ combinations = {
         # *getRegularizedPaperModels()
         *getRegularizedPaperModelsDropOnly()
     ],
-    'seconds': [3, 4, 5, 8],
+    'seconds': [4, 8],
     'patiences': [80],
     'train_val_test_percentages': [(62.5, 20.833, 16.666)],
     'data_operations_factories': [
