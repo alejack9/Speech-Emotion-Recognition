@@ -10,11 +10,14 @@ import logging
 
 class RegularizedPaperModelFactory(ModelFactory):
   def get_model_name(self, _={}):
-     return f"PaperModelRegularized_d{self.dropout}_l2{str(self.l2_factor).split('.')[1]}"
+     name = f"PaperModelRegularized_d{str(self.dropout).split('.')[1]}"
+     if (self.l2 != None):
+      name = name + f"_l2{str(self.l2).split('.')[1]}"
+     return name
 
-  def set_conf(self, dropout = 0.2, l2 = 0.01):
+  def set_conf(self, dropout = 0.2, l2 = None):
     self.dropout = dropout
-    self.l2_factor = l2;
+    self.l2 = l2;
 
   def get_model(self, args={'input_shape': (1, 1), "print_summary": False}):
     '''input_shape = (sample_rate * seconds, 1)'''
@@ -28,18 +31,18 @@ class RegularizedPaperModelFactory(ModelFactory):
 
     # first layer
     # input shape (None, n) = variable-length sequences of n-dimensional vectors
-    model.add(Conv1D(filters[0], sizes[0], activation=activation, input_shape=args['input_shape'], kernel_regularizer=L2(l2=self.l2_factor)))
+    model.add(Conv1D(filters[0], sizes[0], activation=activation, input_shape=args['input_shape'], kernel_regularizer= L2(l2=self.l2) if (self.l2 != None) else None))
     model.add(BatchNormalization())
     model.add(MaxPooling1D(pool_size=pool_size))
 
     # middle layers
     for (filter_size, kernel_size) in list(zip(filters, sizes))[1:-1]:
-        model.add(Conv1D(filter_size, kernel_size, activation=activation, kernel_regularizer=L2(l2=self.l2_factor)))
+        model.add(Conv1D(filter_size, kernel_size, activation=activation, kernel_regularizer=L2(l2=self.l2) if (self.l2 != None) else None))
         model.add(BatchNormalization())
         model.add(MaxPooling1D(pool_size=pool_size))
 
     # last layer
-    model.add(Conv1D(filters[-1], sizes[-1], activation=activation, kernel_regularizer=L2(l2=self.l2_factor)))
+    model.add(Conv1D(filters[-1], sizes[-1], activation=activation, kernel_regularizer=L2(l2=self.l2) if (self.l2 != None) else None))
     model.add(BatchNormalization())
     model.add(GlobalMaxPooling1D())
 

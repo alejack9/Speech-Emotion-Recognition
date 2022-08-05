@@ -63,12 +63,15 @@ def _getRegPaperModel(drop, l2):
 def getRegularizedPaperModels():
     return [_getRegPaperModel(drop, l2) for (drop, l2) in product(regDrops, regL2s)]
 
+def getRegularizedPaperModelsDropOnly():
+    return [_getRegPaperModel(drop= drop) for drop in regDrops]
 
 combinations = {
     'model_factories': [
         # PaperModelFactory(),
         # *getCustomModels()
-        *getRegularizedPaperModels()
+        # *getRegularizedPaperModels()
+        *getRegularizedPaperModelsDropOnly()
     ],
     'seconds': [3, 4, 5, 8],
     'patiences': [80],
