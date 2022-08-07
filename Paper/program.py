@@ -12,17 +12,28 @@ import logging
 import re
 import os
 
+# SAVEE
+# def get_label(file_path):
+#   parts = re.sub('.+\_|[0-9]+.wav', '', file_path)
+#   return parts
+
+
+# def get_speaker_name(file_path):
+#   parts = re.sub('.*[/]+|\_|[a-z]+[0-9]+.wav', '', file_path)
+#   return parts
+
+
+# ESD
 def get_label(file_path):
-  parts = re.sub('.+\_|[0-9]+.wav', '', file_path)
+  parts = re.sub('.*[/]+[a-z]\_|\_[0-9]+.wav', '', file_path)
   return parts
 
-
 def get_speaker_name(file_path):
-  parts = re.sub('.*[/]+|\_|[a-z]+[0-9]+.wav', '', file_path)
+  parts = re.sub('.*[/]+|\_|[a-z]+_[0-9]+.wav', '', file_path)
   return parts
 
 def data_analysis(plots_dir, df):
-  visual.plot_speakers_pie(df, output_file=join(plots_dir, "speakers_pie.png"))
+  visual.plot_speakers_pie(df, rows=5, cols=5, output_file=join(plots_dir, "speakers_pie.png"))
   visual.kde_plot(df['length'], output_file=join(plots_dir, "lengths_kde.png"))
 
 def run(data_dir, working_dir, epochs, batch_sizes):
