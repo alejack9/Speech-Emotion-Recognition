@@ -8,7 +8,7 @@ class PaperModelFactory(ModelFactory):
   def get_model_name(self, _={}):
      return "PaperModel"
 
-  def get_model(self, args={'input_shape': (1, 1), "print_summary": False, 'dropout': 0.0}):
+  def get_model(self, args={'input_shape': (1, 1), "print_summary": False, 'dropout': 0.0, 'classes': 7}):
     '''input_shape = (sample_rate * seconds, 1)'''
     
     filters = [32, 64, 128, 256, 512, 1024, 1024]
@@ -40,10 +40,10 @@ class PaperModelFactory(ModelFactory):
       model.add(Dropout(args['dropout']))
       model.add(Dense(128, activation=activation))
       model.add(Dropout(args['dropout']))
-      model.add(Dense(7, activation='softmax'))
+      model.add(Dense(args['classes'], activation='softmax'))
     else:
       model.add(Dense(128, activation=activation))
-      model.add(Dense(7, activation='softmax'))
+      model.add(Dense(args['classes'], activation='softmax'))
 
     if args.get("print_summary", False):
       model.summary()
