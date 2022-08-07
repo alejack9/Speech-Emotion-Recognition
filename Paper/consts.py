@@ -2,7 +2,7 @@ import numpy as np
 
 SEED = 0
 
-DATA_DIR = "./data/SAVEE"
+DATA_DIR = "./data/ESD_data"
 WORKING_DIR = './stuff'
 
 EPOCHS = 400
