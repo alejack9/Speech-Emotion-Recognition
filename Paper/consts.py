@@ -3,7 +3,7 @@ import numpy as np
 SEED = 0
 
 DATA_DIR = "./data/ESD_data"
-WORKING_DIR = './stuff'
+WORKING_DIR = './ESD_stuff/'
 
 EPOCHS = 400
 

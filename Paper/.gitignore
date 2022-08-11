@@ -2,5 +2,6 @@ data
 savee.zip
 __pycache__
 **/*.old
+
 tmp/
-stuff/
+*stuff/
