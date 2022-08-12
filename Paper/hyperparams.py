@@ -58,7 +58,7 @@ combinations = {
     *getCustomModels()
   ],
   'seconds' : [3, 4, 5, 8],
-  'patiences' : [25, 80],
+  'patiences' : [80],
   'dropouts': [0, 0.2, 0.5],
   'train_val_test_percentages' : [(62.5, 20.833, 16.666)],
   'data_operations_factories' : [
