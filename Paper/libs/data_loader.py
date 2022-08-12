@@ -137,5 +137,10 @@ def load_datasets(df, max_sample_rate, audio_sample_seconds, data_ops_factory, t
       'complete': np.unique(df['label'], return_counts=True),
       'train': np.unique(list(map(str, train_ds['label'])), return_counts=True),
       'val': np.unique(list(map(str, val_ds['label'])), return_counts=True)
+    },
+    'filenames': {
+      'train': train_ds['filename'],
+      'val': val_ds['filename'],
+      'test': test_ds['filename'],
     }
   }

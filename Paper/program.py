@@ -90,7 +90,7 @@ def run(data_dir, working_dir, epochs, batch_sizes):
 
       logdir = join(logs_dir, datetime.now().strftime("%Y%m%d-%H%M%S"))
 
-      cbs = get_callbacks(train_ds['filename'], val_ds['filename'], test_ds['filename'], checkpoints_dir, logdir, last_epoch_file_path, patience)
+      cbs = get_callbacks(additional['filenames']['train'], additional['filenames']['val'], additional['filenames']['test'], checkpoints_dir, logdir, last_epoch_file_path, patience)
 
       try:
         model_runner.run(model, train_ds, val_ds, cbs=cbs, epochs=epochs, init_epoch=init_epoch)
