@@ -1,6 +1,5 @@
 import tensorflow as tf
 import numpy as np
-from libs.utils import create_folder
 from consts import DATA_DIR, WORKING_DIR, SEED, EPOCHS, BATCH_SIZES, LOGGING_LEVEL
 import os
 import logging
