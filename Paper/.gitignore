@@ -4,4 +4,4 @@ __pycache__
 **/*.old
 
 tmp/
-*stuff/
+saved_models/
