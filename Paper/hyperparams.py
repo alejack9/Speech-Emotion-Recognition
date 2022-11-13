@@ -11,7 +11,7 @@ def _getCustomModel(hp):
   model.setHyperparams(hp)
   return model
 
-def getCustomModels():
+def getCustomModels(dropouts = [0]):
   ''' Returns a list of custom models'''
     # model hyperparams
   no_conv_layers = [2, 3, 4]
@@ -23,8 +23,7 @@ def getCustomModels():
   fc_neurons = [20, 60]
 
   activations = ['relu']
-  dropouts = [0]
-
+  
   #  Adam optimizer
   learning_rates = [0.001]
   b1s = [0.9]
@@ -49,7 +48,7 @@ def getCustomModels():
 # lists of combinations (models architectures and/or data preprocessing pipelines) to try for:
 # - paperModel trial: try different preprocessing pipelines on the same architecture from paper  
 # - customModel trial: try different arch via hyperparams tuning and also different preprocessing pipelines
-custom_model_combinations = {
+SAVEE_custom_model_combinations = {
   'model_factories': [
       # PaperModelFactory(),
       *getCustomModels()
@@ -61,6 +60,26 @@ custom_model_combinations = {
       ('crop', lambda _: [
           data_ops.Crop(),
       ]),
+  ]
+}
+
+ESD_custom_model_combinations = {
+ 'model_factories': [
+    # PaperModelFactory(), 
+    *getCustomModels(dropouts=[0.2, 0.5])
+  ],
+  'seconds' : [3, 4, 7],
+  'patiences' : [80],
+  'dropouts': [0, 0.2, 0.5],
+  'train_val_test_percentages' : [(80, 10, 10)],
+  'data_operations_factories' : [
+    ('crop', lambda _: [
+        data_ops.Crop(),
+    ]),
+    ('crop_norm', lambda _: [
+        data_ops.Crop(),
+        data_ops.Normalize()
+    ])
   ]
 }
 
@@ -138,10 +157,12 @@ paper_model_combinations = {
 }
 
 paper_model_total = reduce(lambda a, b: a * b, list(map(len, paper_model_combinations.values())), 1)
-custom_model_total = reduce(lambda a, b: a * b, list(map(len, custom_model_combinations.values())), 1)
+SAVEE_custom_model_total = reduce(lambda a, b: a * b, list(map(len, SAVEE_custom_model_combinations.values())), 1)
+ESD_custom_model_total = reduce(lambda a, b: a * b, list(map(len, ESD_custom_model_combinations.values())), 1)
 
 configurations = {
   "paper-model-data-pipe": (paper_model_combinations, paper_model_total),
-  "custom-model": (custom_model_combinations, custom_model_total),
-  "custom-model-normalized-data": (None, None)
+  "SAVEE-custom-model": (SAVEE_custom_model_combinations, SAVEE_custom_model_total),
+  "ESD-custom-model": (ESD_custom_model_combinations, ESD_custom_model_total),
 }
+
