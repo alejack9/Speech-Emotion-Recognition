@@ -1,4 +1,4 @@
-from consts import DATA_DIR, WORKING_DIR, SEED, EPOCHS, BATCH_SIZES, LOGGING_LEVEL
+from consts import SAVEE_DATA_DIR, ESD_DATA_DIR, SAVEE_WORKING_DIR, ESD_WORKING_DIR, SEED, EPOCHS, BATCH_SIZES, LOGGING_LEVEL
 import tensorflow as tf
 import os
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
@@ -14,7 +14,16 @@ import numpy as np
 np.random.seed(SEED)
 
 import program
-program.run(DATA_DIR, WORKING_DIR, EPOCHS, BATCH_SIZES)
+
+# paper-model-data-pipe: training on paper model with different data pipeline configurations
+# custom-model: training of custom models (chosen via hyperameters tuning) and only crop preprocessing
+for conf_type in ["paper-model-data-pipe", "custom-model"]:
+    program.run(SAVEE_DATA_DIR, SAVEE_WORKING_DIR, EPOCHS, BATCH_SIZES, "SAVEE", conf_type)
+    program.run(ESD_DATA_DIR, ESD_WORKING_DIR, EPOCHS, BATCH_SIZES, "ESD", conf_type)
+
+#  ONLY ON ESD DATA
+# custom-model-normalized-data: training of custom models (chosen via hyperameters tuning) and only crop-normalize preprocessing
+program.run(ESD_DATA_DIR, ESD_WORKING_DIR, EPOCHS, BATCH_SIZES, "ESD", "custom-model-normalized-data")
 
 
 

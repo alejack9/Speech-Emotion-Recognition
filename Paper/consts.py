@@ -2,8 +2,11 @@ import numpy as np
 
 SEED = 0
 
-DATA_DIR = "./data/SAVEE"
-WORKING_DIR = './stuff'
+SAVEE_DATA_DIR = "./data/SAVEE"
+ESD_DATA_DIR = "./data/ESD_data"
+
+SAVEE_WORKING_DIR = "./SAVEE_project_data/"
+ESD_WORKING_DIR = "./ESD_project_data/"
 
 EPOCHS = 400
 

@@ -6,8 +6,10 @@ from datetime import datetime
 from itertools import product
 # from hyperparams import total as total_pars, combinations as hyperparams
 
-from hyperparams import paper_model_total, custom_model_total
-from hyperparams import paper_model_combinations, custom_model_combinations
+from hyperparams import configurations
+
+# from hyperparams import paper_model_total, custom_model_total
+# from hyperparams import paper_model_combinations, custom_model_combinations
 
 import libs.data_loader as data_loader
 import libs.model_runner as model_runner
@@ -17,11 +19,6 @@ import logging
 import re
 import os
 
-
-conf = {
-    "paper-model-data-pipe": (paper_model_combinations, paper_model_total),
-    "custom-model": (custom_model_combinations, custom_model_total)
-}
 data_utilities = {
     "ESD": (
         lambda file_path: re.sub('.*[/]+[a-z]\_|\_[0-9]+.wav', '', file_path), # get label
@@ -40,9 +37,9 @@ def data_analysis(plots_dir, df):
         plots_dir, "lengths_kde.png"))
 
 
-def run(data_dir, working_dir, epochs, batch_sizes, ds_name, conf_type ):
-    ''' ds_name -> ESD or SAVEE
-        conf_type -> paper-model-data-pipe or custom-model
+def run(data_dir, working_dir, epochs, batch_sizes, ds_name, conf_type):
+    ''' ds_name -> ESD or SAVEE \r\n
+        conf_type -> paper-model-data-pipe,custom-model, custom-model-normalized-data
     '''
 
     plots_dir = create_folder(join(working_dir, "plots"))
@@ -58,7 +55,12 @@ def run(data_dir, working_dir, epochs, batch_sizes, ds_name, conf_type ):
 
     data_analysis(plots_dir, df)
 
-    hyperparams, total_pars = conf[conf_type]
+    # configurations = {
+    #   "paper-model-data-pipe": (paper_model_combinations, paper_model_total),
+    #   "custom-model": (custom_model_combinations, custom_model_total),
+    #   "custom-model-normalized-data": (None, None)
+# }
+    hyperparams, total_pars = configurations[conf_type]
 
     for i, (model_factory, train_val_tests_percentage, audio_seconds, (data_ops_name, data_ops_factory), patience, dropout) in enumerate(product(hyperparams['model_factories'], hyperparams['train_val_test_percentages'], hyperparams['seconds'], hyperparams['data_operations_factories'], hyperparams['patiences'], hyperparams['dropouts'])):
         computed = False
