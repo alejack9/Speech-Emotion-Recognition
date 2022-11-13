@@ -11,10 +11,11 @@ def _getCustomModel(hp):
   model.setHyperparams(hp)
   return model
 
+
 def getCustomModels(dropouts = [0]):
   ''' Returns a list of custom models'''
     # model hyperparams
-  no_conv_layers = [2, 3, 4]
+  no_conv_layers = [2, 3, 4, 5, 6]
   no_filters = [32, 64, 128, 256]
   filter_sizes = [3, 9, 12]
 
@@ -66,7 +67,7 @@ SAVEE_custom_model_combinations = {
 ESD_custom_model_combinations = {
  'model_factories': [
     # PaperModelFactory(), 
-    *getCustomModels(dropouts=[0.2, 0.5])
+    *getCustomModels(dropouts=[0, 0.2, 0.5])
   ],
   'seconds' : [3, 4, 7],
   'patiences' : [80],
