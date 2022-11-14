@@ -163,3 +163,4 @@ def load_datasets(df, max_sample_rate, audio_sample_seconds, data_ops_factory, t
         'val': val_ds['filename'],
         'test': test_ds['filename'],
         }
+    }
