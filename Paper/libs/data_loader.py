@@ -10,6 +10,8 @@ import tensorflow_io as tfio
 import libs.data_operations as data_ops
 import logging
 import librosa
+import libs.utils as utils
+from consts import SEED
 
 def get_dataset_information(samples_location, file_label_getter, file_speaker_getter):
 
@@ -17,14 +19,22 @@ def get_dataset_information(samples_location, file_label_getter, file_speaker_ge
         f'{samples_location}/{p}' for p in listdir(samples_location)]
 
     labels = list(map(file_label_getter, filenames))
-
     df = pd.DataFrame({
         'filename': filenames,
         'speaker': map(file_speaker_getter, filenames),
         'label': labels})
-    df['length'] = df['filename'].map(
-        lambda x: librosa.get_duration(filename=x))
+
+    df['length'] = df['filename'].map(lambda x: librosa.get_duration(filename=x))
     df['sample_rate'] = df['filename'].map(librosa.get_samplerate)
+
+  
+    # print(df.sort_values(by=['length']))
+    # print(df.sort_values(by=['sample_rate']))
+    # utils.checkDecodingWAVCorrectness(df['filename'])
+
+    logging.debug("Calculating max sample rate...")
+    max_sample_rate = df['sample_rate'].max()
+    logging.debug("Calculating max sample rate... Done")
 
     # logging.debug("Calculating max sample rate...")
     max_sample_rate = df['sample_rate'].max()
@@ -144,8 +154,12 @@ def load_datasets(df, max_sample_rate, audio_sample_seconds, data_ops_factory, t
 
     return train_tf_ds, val_tf_ds, test_tf_ds, {
         'labels_distribution': {
-            'complete': np.unique(df['label'], return_counts=True),
-            'train': np.unique(list(map(str, train_ds['label'])), return_counts=True),
-            'val': np.unique(list(map(str, val_ds['label'])), return_counts=True)
+        'complete': np.unique(df['label'], return_counts=True),
+        'train': np.unique(list(map(str, train_ds['label'])), return_counts=True),
+        'val': np.unique(list(map(str, val_ds['label'])), return_counts=True)
+        },
+        'filenames': {
+        'train': train_ds['filename'],
+        'val': val_ds['filename'],
+        'test': test_ds['filename'],
         }
-    }

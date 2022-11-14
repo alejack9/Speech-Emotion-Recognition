@@ -4,7 +4,6 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.optimizers import Adam
 import logging
 
-
 class CustomModelFactory(ModelFactory):
 
     def get_model_name(self, _={}):
@@ -14,7 +13,7 @@ class CustomModelFactory(ModelFactory):
         self.hp = hp
         
 
-    def get_model(self, args={'input_shape': (1, 1), "print_summary": False, }):
+    def get_model(self, args={'input_shape': (1, 1), "print_summary": False, "classes": 7}):
         '''input_shape = (sample_rate * seconds, 1)'''
 
 #         {
@@ -59,7 +58,7 @@ class CustomModelFactory(ModelFactory):
             model.add(Dropout(self.hp['dropout']))
 
         #  last dense layer
-        model.add(Dense(7, activation='softmax'))
+        model.add(Dense(args["classes"], activation='softmax'))
 
         if args.get("print_summary", False):
             model.summary()

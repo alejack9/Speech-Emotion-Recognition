@@ -46,6 +46,10 @@ def run(data_dir, working_dir, epochs, batch_sizes, ds_name, conf_type):
     completed_models_dir = create_folder(join(working_dir, "done"))
 
     logging.info("Loading data...")
+    n_classes = len(df['label'].unique())
+    logging.info(f"{n_classes} classes.")
+
+    data_analysis(plots_dir, df)
 
     get_label, get_speaker_name = data_utilities[ds_name] # get SAVEE or ESD utility function
 
@@ -72,9 +76,7 @@ def run(data_dir, working_dir, epochs, batch_sizes, ds_name, conf_type):
             train_ds, val_ds, test_ds, additional = data_loader.load_datasets(df, max_sample_rate, audio_seconds,
                                                                                 data_ops_factory, train_val_tests_percentage)
 
-            model = model_factory.get_model(args={"input_shape": (
-                max_sample_rate * audio_seconds, 1), 'print_summary': True})
-
+            model = model_factory.get_model(args={"input_shape": (max_sample_rate * audio_seconds, 1), 'dropout': dropout, 'print_summary': False, 'classes': n_classes})
             model_name = f"m{model_factory.get_model_name()}_s{audio_seconds}_b{batch_size}_d{dropout}_p{patience}_o_{data_ops_name}_sz{str(train_val_tests_percentage).replace(' ', '')[1:-1]}"
 
             done_model_path = join(completed_models_dir, model_name)
