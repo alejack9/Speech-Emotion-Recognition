@@ -71,31 +71,47 @@ def load_datasets(df, max_sample_rate, audio_sample_seconds, data_ops_factory, t
     df['end'] = df['end'].map(lambda x: x * max_sample_rate)
 
     per_speaker_test_samples = int(
-        round(len(df) * train_val_test_percentages[2] / 100.0, 0) // n_speakers)
+         round(len(df) * train_val_test_percentages[2] / 100.0, 0) // n_speakers)
     per_speaker_val_samples = int(
-        round(len(df) * train_val_test_percentages[1] / 100.0, 0) // n_speakers)
+         round(len(df) * train_val_test_percentages[1] / 100.0, 0) // n_speakers)
+
+    usePercentage = not all([per_speaker_test_samples > value for value in df["speaker"].value_counts().values])
 
     trainval_test_splitter = StratifiedShuffleSplit(
-        n_splits=10, test_size=per_speaker_test_samples, random_state=SEED)
+        n_splits=10, test_size=float(train_val_test_percentages[2]/100 if usePercentage else per_speaker_test_samples), random_state=SEED)
     train_val_splitter = StratifiedShuffleSplit(
-        n_splits=10, test_size=per_speaker_val_samples, random_state=SEED)
+        n_splits=10, test_size=float(train_val_test_percentages[1]/100 if usePercentage else per_speaker_val_samples), random_state=SEED)
 
     train_ds, val_ds, test_ds = pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
 
-    for speaker in df['speaker'].unique():
-        data = df[df['speaker'] == speaker]
-
-        for train_val_indexes, test_indexes in trainval_test_splitter.split(np.zeros(len(data)), data['label']):
+    if usePercentage:    
+        for train_val_indexes, test_indexes in trainval_test_splitter.split(np.zeros(len(df)), df[['speaker', 'label']]):
             speaker_train_val_i = train_val_indexes
-            speaker_test_ds = data.iloc[test_indexes, :]
+            speaker_test_ds = df.iloc[test_indexes, :]
 
-        for train_indexes, val_indexes in train_val_splitter.split(speaker_train_val_i, data['label'].iloc[speaker_train_val_i]):
-            speaker_train_ds = data.iloc[train_indexes, :]
-            speaker_val_ds = data.iloc[val_indexes, :]
+        for train_indexes, val_indexes in train_val_splitter.split(speaker_train_val_i, df[['speaker', 'label']].iloc[speaker_train_val_i]):
+            speaker_train_ds = df.iloc[train_indexes, :]
+            speaker_val_ds = df.iloc[val_indexes, :]
 
-        train_ds = pd.concat([train_ds, speaker_train_ds])
-        val_ds = pd.concat([val_ds, speaker_val_ds])
-        test_ds = pd.concat([test_ds, speaker_test_ds])
+        train_ds = speaker_train_ds
+        val_ds = speaker_val_ds
+        test_ds = speaker_test_ds
+
+    else:
+        for speaker in df['speaker'].unique():
+            data = df[df['speaker'] == speaker]
+
+            for train_val_indexes, test_indexes in trainval_test_splitter.split(np.zeros(len(data)), data['label']):
+                speaker_train_val_i = train_val_indexes
+                speaker_test_ds = data.iloc[test_indexes, :]
+
+            for train_indexes, val_indexes in train_val_splitter.split(speaker_train_val_i, data['label'].iloc[speaker_train_val_i]):
+                speaker_train_ds = data.iloc[train_indexes, :]
+                speaker_val_ds = data.iloc[val_indexes, :]
+
+            train_ds = pd.concat([train_ds, speaker_train_ds])
+            val_ds = pd.concat([val_ds, speaker_val_ds])
+            test_ds = pd.concat([test_ds, speaker_test_ds])
 
     logging.info(f'Training set size: {len(train_ds)}')
     logging.info(f'Validation set size: {len(val_ds)}')
@@ -118,6 +134,7 @@ def load_datasets(df, max_sample_rate, audio_sample_seconds, data_ops_factory, t
         np.asarray(train_ds['start'].to_numpy()).astype('int32'),
         np.asarray(train_ds['end'].to_numpy()).astype('int32')
     ))
+
     val_tf_ds = tfio.audio.AudioIODataset.from_tensor_slices((
         val_ds['filename'].to_numpy(),
         val_ds[one_hot_column_names].to_numpy(),
