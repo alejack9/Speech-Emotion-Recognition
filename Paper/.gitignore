@@ -1,3 +1,9 @@
 data
+stuff
+tmp
+saved_models
+
 savee.zip
 __pycache__
+
+**/*.old
