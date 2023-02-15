@@ -45,24 +45,24 @@ def run(data_dir, working_dir, epochs, batch_sizes, ds_name, conf_type):
     plots_dir = create_folder(join(working_dir, "plots"))
     completed_models_dir = create_folder(join(working_dir, "done"))
 
+    get_label, get_speaker_name = data_utilities[ds_name] # get SAVEE or ESD utility function
+
     logging.info("Loading data...")
+
+    df, one_hot_mapper, max_sample_rate = data_loader.get_dataset_information(
+        data_dir, get_label, get_speaker_name)
+    logging.info("Loading data... done")
+    
     n_classes = len(df['label'].unique())
     logging.info(f"{n_classes} classes.")
 
     data_analysis(plots_dir, df)
 
-    get_label, get_speaker_name = data_utilities[ds_name] # get SAVEE or ESD utility function
-
-    df, one_hot_mapper, max_sample_rate = data_loader.get_dataset_information(
-        data_dir, get_label, get_speaker_name)
-    logging.info("Loading data... done")
-
-    data_analysis(plots_dir, df)
-
     # configurations = {
     #   "paper-model-data-pipe": (paper_model_combinations, paper_model_total),
-    #   "custom-model": (custom_model_combinations, custom_model_total),
-    #   "custom-model-normalized-data": (None, None)
+    #   "SAVEE-custom-model": (SAVEE_custom_model_combinations, SAVEE_custom_model_total),
+    #   "ESD-custom-model": (ESD_custom_model_combinations, ESD_custom_model_total),
+    #   "ESD-paper-model": (ESD_paper_model_combinations, 1)
 # }
     hyperparams, total_pars = configurations[conf_type]
 

@@ -65,7 +65,7 @@ SAVEE_custom_model_combinations = {
 
 ESD_custom_model_combinations = {
  'model_factories': [ 
-    *getCustomModels(no_conv_layers = [4, 5, 6], dropouts=[0, 0.2, 0.5])
+    *getCustomModels(conv_layers = [4, 5, 6], dropouts=[0, 0.2, 0.5])
   ],
   'seconds' : [3, 4, 7],
   'patiences' : [80],
@@ -155,6 +155,21 @@ paper_model_combinations = {
   ]
 }
 
+ESD_paper_model_combinations = {
+  'model_factories': [
+    PaperModelFactory()
+  ],
+  'seconds' : [8],
+  'patiences' : [80],
+  'dropouts': [0],
+  'train_val_test_percentages' : [(62.5, 20.833, 16.666)],
+  'data_operations_factories' : [
+    ('crop', lambda _: [
+        data_ops.Crop(),
+    ])
+  ]
+}
+
 paper_model_total = reduce(lambda a, b: a * b, list(map(len, paper_model_combinations.values())), 1)
 SAVEE_custom_model_total = reduce(lambda a, b: a * b, list(map(len, SAVEE_custom_model_combinations.values())), 1)
 ESD_custom_model_total = reduce(lambda a, b: a * b, list(map(len, ESD_custom_model_combinations.values())), 1)
@@ -163,5 +178,6 @@ configurations = {
   "paper-model-data-pipe": (paper_model_combinations, paper_model_total),
   "SAVEE-custom-model": (SAVEE_custom_model_combinations, SAVEE_custom_model_total),
   "ESD-custom-model": (ESD_custom_model_combinations, ESD_custom_model_total),
+  "ESD-paper-model": (ESD_paper_model_combinations, 1)
 }
 

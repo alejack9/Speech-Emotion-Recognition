@@ -3,7 +3,7 @@ import numpy as np
 SEED = 0
 
 SAVEE_DATA_DIR = "./data/SAVEE"
-ESD_DATA_DIR = "./data/ESD_data"
+ESD_DATA_DIR = "./data/ESD"
 
 SAVEE_WORKING_DIR = "./SAVEE_project_data/"
 ESD_WORKING_DIR = "./ESD_project_data/"
