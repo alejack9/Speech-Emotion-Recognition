@@ -16,11 +16,7 @@ np.random.seed(SEED)
 
 import program
 
-# paper-model-data-pipe: training on paper model with different data pipeline configurations
-
-# SAVEE custom-model: training of custom models (chosen via hyperameters tuning) and only crop preprocessing
-# ESD custom-model: training of custom models (chosen via hyperameters tuning) and only crop and crop + normalization preprocessing
-
+# conf type must be one of the possible type in the dict configuration of hyperparameters.py file
 for conf_type in ["paper-model-data-pipe", "SAVEE-custom-model"]:
     program.run(SAVEE_DATA_DIR, SAVEE_WORKING_DIR, EPOCHS, BATCH_SIZES, "SAVEE", conf_type)
 

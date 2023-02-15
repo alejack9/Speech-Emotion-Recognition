@@ -4,12 +4,13 @@ from models.callbacks import get_callbacks
 from os.path import join
 from datetime import datetime
 from itertools import product
+
 # from hyperparams import total as total_pars, combinations as hyperparams
+# from hyperparams import paper_model_total, custom_model_total
+# from hyperparams import paper_model_combinations, custom_model_combinations
 
 from hyperparams import configurations
 
-# from hyperparams import paper_model_total, custom_model_total
-# from hyperparams import paper_model_combinations, custom_model_combinations
 
 import libs.data_loader as data_loader
 import libs.model_runner as model_runner
@@ -56,7 +57,7 @@ def run(data_dir, working_dir, epochs, batch_sizes, ds_name, conf_type):
     n_classes = len(df['label'].unique())
     logging.info(f"{n_classes} classes.")
 
-    data_analysis(plots_dir, df)
+    # data_analysis(plots_dir, df)
 
     # configurations = {
     #   "paper-model-data-pipe": (paper_model_combinations, paper_model_total),
